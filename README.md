@@ -1,52 +1,165 @@
-# ts_management
+# 📱 Smart Campus Navigation App
 
-A new Flutter project.
+![Flutter](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter)
+![Dart](https://img.shields.io/badge/Dart-3.x-blue?logo=dart)
+![Firebase](https://img.shields.io/badge/Firebase-Backend-orange?logo=firebase)
+![Status](https://img.shields.io/badge/Status-In%20Development-yellow)
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 📌 Project Overview
 
-A few resources to get you started if this is your first Flutter project:
+Smart Campus Navigation нь их сургуулийн кампус доторх барилга, анги танхим, үйлчилгээний байршлыг хялбар олох боломж олгодог мобайл аппликейшн юм.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Энэхүү апп нь хэрэглэгчийн байршилд тулгуурлан хамгийн ойр замыг харуулж, QR код болон газрын зураг ашиглан навигаци хийдэг.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
 
-# 🚫 Rules for Main Branch
+## 🎯 Objectives
 
-* Never push directly to `main`
+* Кампус дотор төөрөх асуудлыг шийдэх
+* Анги, өрөө хурдан олох
+* Цаг хэмнэх
+* Мэдээллийг төвлөрүүлэх
+
+---
+
+## 👥 Team Members
+
+| Name      | Role                 | Branch             |
+| --------- | -------------------- | ------------------ |
+| Your Name | UI Developer         | feature-ui         |
+| Member 2  | Navigation Developer | feature-navigation |
+| Member 3  | Backend Developer    | feature-backend    |
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+
+* Flutter
+
+### Backend
+
+* Firebase (Auth, Firestore)
+
+### Tools
+
+* Git & GitHub
+* Figma (UI Design)
+
+---
+
+## 📂 Project Structure
+
+```
+lib/
+ ├── models/        # Data models
+ ├── services/      # API & Firebase services
+ ├── screens/       # UI screens
+ ├── widgets/       # Reusable components
+ ├── controllers/   # Logic control
+```
+
+---
+
+## 🚀 Features
+
+### 📍 Navigation
+
+* Map view
+* Current location detection
+* Route guidance
+
+### 🔍 Search
+
+* Search building
+* Search room
+
+### 📷 QR Code
+
+* Scan QR to find location
+
+### 🔔 Notifications
+
+* Event notifications
+
+### 📅 Student Features
+
+* View schedule
+* To-do list
+
+---
+
+## 🔄 Workflow (Team Rules)
+
+### ⚠️ Important Rules
+
+* Do NOT push directly to `main`
 * Always use Pull Request
-* At least 1 teammate must review
-* Never use `git push --force`
+* Work only on your assigned branch
+* Push your code daily
 
-👉 If you break this rule, you break the project
+---
 
-1. Clone project
+## 💻 Git Commands
+
+### Clone project
+
+```
 git clone https://github.com/your-username/your-repo.git
 cd your-repo
-2. Switch to your branch
-git checkout feature-yourname
-3. Before coding (ALWAYS)
-git pull origin feature-yourname
-4. After coding
+```
+
+### Switch branch
+
+```
+git checkout feature-your-branch
+```
+
+### Pull latest changes
+
+```
+git pull origin feature-your-branch
+```
+
+### Push changes
+
+```
 git add .
-git commit -m "clear message"
-git push origin feature-yourname
-5. Rules ⚠️
-Do NOT push to main
-Do NOT change other people's files without telling
-Keep commits small and clear
-Push daily (don’t keep big changes locally)
-6. When feature is done
-Go to GitHub
-Create Pull Request → main
-Wait for approval
-Merge
-7. If something breaks
-Don’t panic
-Don’t force push
-Ask in group chat
+git commit -m "your message"
+git push origin feature-your-branch
+```
+
+---
+
+## 📅 Development Phases
+
+1. Planning
+2. Design (UI + Database)
+3. Development
+4. Testing
+5. Deployment
+
+---
+
+## ⚠️ Challenges / Risks
+
+* GPS accuracy issues
+* Map data availability
+* Real-time updates complexity
+
+---
+
+## 📈 Future Improvements
+
+* Real-time navigation
+* Indoor positioning system
+* AI-based route optimization
+
+---
+
+## 📜 License
+
+This project is for educational purposes.
