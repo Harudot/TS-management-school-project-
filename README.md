@@ -28,9 +28,9 @@ Smart Campus Navigation нь их сургуулийн кампус доторх
 
 | Name      | Role                 | Branch             |
 | --------- | -------------------- | ------------------ |
-| Your Name | UI Developer         | feature-ui         |
-| Member 2  | Navigation Developer | feature-navigation |
-| Member 3  | Backend Developer    | feature-backend    |
+| Haru      | ????????????         | feature-dev3       |
+| Dawka     | ????????????         | feature-dev2       |
+| Dashmii   | ????????????         | feature-dev1       |
 
 ---
 
