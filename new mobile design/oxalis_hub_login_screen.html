@@ -1,0 +1,185 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+.phone-wrap{display:flex;justify-content:center;padding:2rem 0}
+.phone{width:360px;min-height:720px;border-radius:40px;overflow:hidden;position:relative;background:#1a0d2e;box-shadow:0 32px 80px rgba(80,30,140,0.45)}
+.bg-art{position:absolute;inset:0;overflow:hidden}
+.bg-art svg{position:absolute;top:0;left:0;width:100%;height:100%}
+.content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;padding:56px 28px 40px;min-height:720px}
+.icon-ring{width:72px;height:72px;border-radius:20px;background:rgba(160,100,220,0.18);border:1px solid rgba(200,150,240,0.3);display:flex;align-items:center;justify-content:center;margin-bottom:20px;backdrop-filter:blur(8px)}
+.brand-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:#EDE0FF;letter-spacing:0.5px;margin-bottom:4px}
+.brand-sub{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(200,160,240,0.6);letter-spacing:3px;text-transform:uppercase;margin-bottom:48px}
+.card{background:rgba(255,255,255,0.05);border:0.5px solid rgba(200,150,240,0.2);border-radius:24px;width:100%;padding:28px 24px;backdrop-filter:blur(12px)}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:#EDE0FF;margin-bottom:4px}
+.card-sub{font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(200,160,240,0.55);margin-bottom:24px;letter-spacing:0.3px}
+.field-label{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(200,160,240,0.6);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:block}
+.input-wrap{position:relative;margin-bottom:16px}
+.input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:0.4}
+.field{width:100%;background:rgba(255,255,255,0.06);border:0.5px solid rgba(200,150,240,0.2);border-radius:12px;padding:12px 14px 12px 40px;font-family:'DM Sans',sans-serif;font-size:13px;color:#EDE0FF;outline:none;transition:border-color 0.2s}
+.field::placeholder{color:rgba(200,160,240,0.35);font-size:12px}
+.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;margin-top:4px}
+.remember{display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(200,160,240,0.5)}
+.check{width:14px;height:14px;border-radius:4px;border:0.5px solid rgba(200,150,240,0.35);background:transparent}
+.forgot{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(180,130,220,0.7);cursor:pointer}
+.btn-main{width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg,#7B40C8 0%,#9B5FD8 50%,#7040B8 100%);border:none;color:#EDE0FF;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;letter-spacing:0.5px;position:relative;overflow:hidden;margin-bottom:20px}
+.btn-main::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);pointer-events:none}
+.divider{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.div-line{flex:1;height:0.5px;background:rgba(200,150,240,0.15)}
+.div-text{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(200,160,240,0.35);letter-spacing:1px}
+.btn-google{width:100%;padding:12px;border-radius:12px;background:rgba(255,255,255,0.06);border:0.5px solid rgba(200,150,240,0.2);color:rgba(210,180,240,0.8);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.footer-text{margin-top:auto;padding-top:28px;font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(200,160,240,0.4);text-align:center}
+.footer-text span{color:rgba(180,130,220,0.75);font-weight:500;cursor:pointer}
+.petal-deco{position:absolute;opacity:0.07;pointer-events:none}
+</style>
+
+<div class="phone-wrap">
+<div class="phone">
+
+<!-- Background art -->
+<div class="bg-art">
+<svg viewBox="0 0 360 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="lg1" cx="30%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#6B35B0" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#1a0d2e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lg2" cx="80%" cy="80%" r="50%">
+      <stop offset="0%" stop-color="#4A1D7A" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#1a0d2e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lg3" cx="60%" cy="10%" r="40%">
+      <stop offset="0%" stop-color="#9B5FD8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="360" height="720" fill="#1a0d2e"/>
+  <rect width="360" height="720" fill="url(#lg1)"/>
+  <rect width="360" height="720" fill="url(#lg2)"/>
+  <rect width="360" height="720" fill="url(#lg3)"/>
+
+  <!-- Large decorative oxalis top-right -->
+  <g transform="translate(300, 80) rotate(20)" opacity="0.12">
+    <g transform="rotate(-90)">
+      <path d="M0,0 C-12,-42 -48,-42 -48,-21 C-48,0 0,21 0,0 Z" fill="#C89FE0"/>
+      <path d="M0,0 C12,-42 48,-42 48,-21 C48,0 0,21 0,0 Z" fill="#C89FE0"/>
+    </g>
+    <g transform="rotate(30)">
+      <path d="M0,0 C-12,-42 -48,-42 -48,-21 C-48,0 0,21 0,0 Z" fill="#D4AEEF"/>
+      <path d="M0,0 C12,-42 48,-42 48,-21 C48,0 0,21 0,0 Z" fill="#D4AEEF"/>
+    </g>
+    <g transform="rotate(150)">
+      <path d="M0,0 C-12,-42 -48,-42 -48,-21 C-48,0 0,21 0,0 Z" fill="#C89FE0"/>
+      <path d="M0,0 C12,-42 48,-42 48,-21 C48,0 0,21 0,0 Z" fill="#C89FE0"/>
+    </g>
+    <circle r="8" fill="#F0C040"/>
+  </g>
+
+  <!-- Small oxalis bottom-left -->
+  <g transform="translate(50, 640) rotate(-15)" opacity="0.09">
+    <g transform="rotate(-90)">
+      <path d="M0,0 C-7,-24 -28,-24 -28,-12 C-28,0 0,12 0,0 Z" fill="#C89FE0"/>
+      <path d="M0,0 C7,-24 28,-24 28,-12 C28,0 0,12 0,0 Z" fill="#C89FE0"/>
+    </g>
+    <g transform="rotate(30)">
+      <path d="M0,0 C-7,-24 -28,-24 -28,-12 C-28,0 0,12 0,0 Z" fill="#D4AEEF"/>
+      <path d="M0,0 C7,-24 28,-24 28,-12 C28,0 0,12 0,0 Z" fill="#D4AEEF"/>
+    </g>
+    <g transform="rotate(150)">
+      <path d="M0,0 C-7,-24 -28,-24 -28,-12 C-28,0 0,12 0,0 Z" fill="#C89FE0"/>
+      <path d="M0,0 C7,-24 28,-24 28,-12 C28,0 0,12 0,0 Z" fill="#C89FE0"/>
+    </g>
+    <circle r="5" fill="#F0C040"/>
+  </g>
+
+  <!-- Tiny scattered petals -->
+  <circle cx="40" cy="120" r="2" fill="#9B5FD8" opacity="0.3"/>
+  <circle cx="320" cy="300" r="1.5" fill="#C89FE0" opacity="0.25"/>
+  <circle cx="80" cy="450" r="2" fill="#7B40C8" opacity="0.2"/>
+  <circle cx="300" cy="580" r="1.5" fill="#9B5FD8" opacity="0.2"/>
+</svg>
+</div>
+
+<!-- Main Content -->
+<div class="content">
+
+  <!-- Icon -->
+  <div class="icon-ring">
+    <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(20,18) rotate(-90)">
+        <path d="M0,0 C-4,-14 -16,-14 -16,-7 C-16,0 0,7 0,0 Z" fill="#C89FE0"/>
+        <path d="M0,0 C4,-14 16,-14 16,-7 C16,0 0,7 0,0 Z" fill="#C89FE0"/>
+      </g>
+      <g transform="translate(20,18) rotate(30)">
+        <path d="M0,0 C-4,-14 -16,-14 -16,-7 C-16,0 0,7 0,0 Z" fill="#D4AEEF"/>
+        <path d="M0,0 C4,-14 16,-14 16,-7 C16,0 0,7 0,0 Z" fill="#D4AEEF"/>
+      </g>
+      <g transform="translate(20,18) rotate(150)">
+        <path d="M0,0 C-4,-14 -16,-14 -16,-7 C-16,0 0,7 0,0 Z" fill="#C89FE0"/>
+        <path d="M0,0 C4,-14 16,-14 16,-7 C16,0 0,7 0,0 Z" fill="#C89FE0"/>
+      </g>
+      <circle cx="20" cy="18" r="3.5" fill="#F0C040"/>
+      <path d="M20,21.5 Q20,28 16,31" stroke="#7BC47A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="13" cy="33" rx="4.5" ry="3" fill="#7BC47A" transform="rotate(-30,13,33)" opacity="0.9"/>
+    </svg>
+  </div>
+
+  <div class="brand-name">Oxalis Hub</div>
+  <div class="brand-sub">Smart Campus Navigation</div>
+
+  <!-- Login Card -->
+  <div class="card">
+    <div class="card-title">Welcome back</div>
+    <div class="card-sub">Sign in to your campus account</div>
+
+    <label class="field-label">Email</label>
+    <div class="input-wrap">
+      <svg class="input-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <rect x="1" y="3" width="13" height="9" rx="2" stroke="rgba(200,160,240,0.7)" stroke-width="1"/>
+        <path d="M1 5l6.5 4.5L14 5" stroke="rgba(200,160,240,0.7)" stroke-width="1" fill="none"/>
+      </svg>
+      <input class="field" type="email" placeholder="your.email@university.edu" readonly/>
+    </div>
+
+    <label class="field-label">Password</label>
+    <div class="input-wrap">
+      <svg class="input-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <rect x="3" y="6" width="9" height="7" rx="1.5" stroke="rgba(200,160,240,0.7)" stroke-width="1"/>
+        <path d="M5 6V4.5a2.5 2.5 0 115 0V6" stroke="rgba(200,160,240,0.7)" stroke-width="1" fill="none"/>
+      </svg>
+      <input class="field" type="password" placeholder="••••••••" readonly/>
+    </div>
+
+    <div class="row">
+      <label class="remember">
+        <div class="check"></div>
+        Remember me
+      </label>
+      <span class="forgot">Forgot password?</span>
+    </div>
+
+    <button class="btn-main">Sign In</button>
+
+    <div class="divider">
+      <div class="div-line"></div>
+      <span class="div-text">OR</span>
+      <div class="div-line"></div>
+    </div>
+
+    <button class="btn-google">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M15.5 8.18c0-.56-.05-1.1-.14-1.63H8v3.08h4.2a3.6 3.6 0 01-1.55 2.36v1.96h2.51C14.8 12.5 15.5 10.5 15.5 8.18z" fill="#4285F4"/>
+        <path d="M8 16c2.1 0 3.86-.7 5.15-1.88l-2.51-1.95c-.7.47-1.59.74-2.64.74-2.03 0-3.75-1.37-4.36-3.21H1.04v2.02A7.99 7.99 0 008 16z" fill="#34A853"/>
+        <path d="M3.64 9.7A4.81 4.81 0 013.38 8c0-.59.1-1.16.26-1.7V4.28H1.04A8 8 0 000 8c0 1.29.31 2.51.85 3.59l2.79-1.88z" fill="#FBBC05"/>
+        <path d="M8 3.18c1.14 0 2.17.39 2.98 1.16l2.23-2.23C11.85.79 10.1 0 8 0A8 8 0 001.04 4.28l2.6 2.02C4.25 4.55 5.97 3.18 8 3.18z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+  </div>
+
+  <div class="footer-text">
+    Don't have an account? <span>Sign Up</span>
+  </div>
+
+</div>
+</div>
+</div>
