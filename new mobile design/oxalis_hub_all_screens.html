@@ -1,0 +1,501 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0e0818}
+.screens-wrap{display:flex;flex-wrap:wrap;gap:24px;justify-content:center;padding:24px 16px}
+.phone{width:300px;min-height:620px;border-radius:36px;overflow:hidden;position:relative;background:#1a0d2e;flex-shrink:0}
+.phone-label{text-align:center;font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(200,160,240,0.45);letter-spacing:2px;text-transform:uppercase;margin-top:10px}
+.ph-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.ph-content{position:relative;z-index:2;display:flex;flex-direction:column;height:100%}
+
+/* Header */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 12px;background:linear-gradient(180deg,#2d1254 0%,rgba(26,13,46,0) 100%)}
+.hdr-brand{display:flex;flex-direction:column}
+.hdr-title{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:#EDE0FF;line-height:1}
+.hdr-role{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(200,160,240,0.5);letter-spacing:1px;margin-top:2px}
+.hdr-menu{width:28px;height:28px;display:flex;flex-direction:column;justify-content:center;gap:4px;cursor:pointer}
+.hdr-menu span{display:block;height:1.5px;background:rgba(200,160,240,0.6);border-radius:2px}
+.hdr-menu span:last-child{width:70%}
+.notif-btn{width:32px;height:32px;border-radius:10px;background:rgba(160,100,220,0.15);border:0.5px solid rgba(200,150,240,0.2);display:flex;align-items:center;justify-content:center;position:relative}
+.notif-dot{position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#9B5FD8;border:1.5px solid #1a0d2e;font-size:7px;color:#fff;display:flex;align-items:center;justify-content:center}
+.page-body{flex:1;overflow-y:auto;padding:0 16px 20px;scrollbar-width:none}
+.page-body::-webkit-scrollbar{display:none}
+
+/* Welcome banner */
+.welcome-banner{border-radius:18px;padding:18px;margin-bottom:16px;position:relative;overflow:hidden;background:linear-gradient(135deg,#5B2D8A,#7B40C8)}
+.wb-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:#EDE0FF;margin-bottom:2px}
+.wb-sub{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(237,224,255,0.65)}
+.wb-deco{position:absolute;right:-10px;top:-10px;opacity:0.12}
+
+/* Section labels */
+.sec-label{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(200,160,240,0.5);letter-spacing:2px;text-transform:uppercase;margin:16px 0 10px}
+
+/* Quick action grid */
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.qa-card{border-radius:14px;padding:14px 12px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(200,150,240,0.15);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.qa-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.qa-label{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(210,185,240,0.8);line-height:1.3}
+
+/* Notification items */
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:14px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(200,150,240,0.12);margin-bottom:8px}
+.notif-icon{width:30px;height:30px;border-radius:9px;background:rgba(155,95,216,0.2);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.notif-title{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:#EDE0FF;margin-bottom:2px}
+.notif-body{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(200,160,240,0.5)}
+.notif-time{font-family:'DM Sans',sans-serif;font-size:9px;color:rgba(200,160,240,0.35);margin-top:3px}
+
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.stat-card{border-radius:14px;padding:14px 12px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(200,150,240,0.15)}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;line-height:1}
+.stat-lbl{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(200,160,240,0.5);margin-top:2px;letter-spacing:0.5px}
+
+/* Schedule items */
+.sched-item{border-radius:14px;padding:14px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(200,150,240,0.15);margin-bottom:8px}
+.sched-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sched-dot{width:32px;height:32px;border-radius:9px;background:rgba(155,95,216,0.2);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sched-name{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#EDE0FF}
+.sched-time{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(200,160,240,0.5);margin-top:1px}
+.sched-meta{display:flex;flex-direction:column;gap:3px;padding-left:2px;margin-bottom:10px}
+.sched-meta span{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(200,160,240,0.55);display:flex;align-items:center;gap:5px}
+.find-btn{width:100%;padding:9px;border-radius:9px;background:linear-gradient(135deg,#7B40C8,#9B5FD8);border:none;color:#EDE0FF;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;letter-spacing:0.5px}
+
+/* Map screen */
+.search-bar{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:0.5px solid rgba(200,150,240,0.2);border-radius:12px;padding:10px 12px;margin-bottom:14px}
+.search-bar input{background:none;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(210,185,240,0.7);width:100%}
+.search-bar input::placeholder{color:rgba(200,160,240,0.35)}
+.map-area{border-radius:16px;height:140px;background:rgba(255,255,255,0.03);border:0.5px solid rgba(200,150,240,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:14px;position:relative;overflow:hidden}
+.map-you{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(155,95,216,0.2);border:0.5px solid rgba(200,150,240,0.3);border-radius:8px;padding:4px 10px;font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(210,185,240,0.8);display:flex;align-items:center;gap:5px}
+.room-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:13px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(200,150,240,0.12);margin-bottom:8px}
+.room-left{}
+.room-name{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:#EDE0FF}
+.room-loc{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(200,160,240,0.5);margin-top:2px}
+.room-prof{font-family:'DM Sans',sans-serif;font-size:9px;color:rgba(200,160,240,0.35);margin-top:2px}
+
+/* Teacher students */
+.student-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(200,150,240,0.12);margin-bottom:8px;cursor:pointer}
+.avatar{width:36px;height:36px;border-radius:50%;background:rgba(155,95,216,0.25);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:#C89FE0;flex-shrink:0}
+.stu-name{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:#EDE0FF}
+.stu-id{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(200,160,240,0.45);margin-top:1px}
+.tag{display:inline-block;padding:2px 7px;border-radius:5px;font-size:9px;font-family:'DM Sans',sans-serif;background:rgba(155,95,216,0.18);color:rgba(200,160,240,0.75);margin-top:4px;margin-right:3px;border:0.5px solid rgba(200,150,240,0.2)}
+
+/* Announce form */
+.form-field{margin-bottom:12px}
+.form-label{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(200,160,240,0.5);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;display:block}
+.form-input{width:100%;background:rgba(255,255,255,0.05);border:0.5px solid rgba(200,150,240,0.2);border-radius:10px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:12px;color:#EDE0FF;outline:none}
+.form-input::placeholder{color:rgba(200,160,240,0.3);font-size:11px}
+.form-textarea{width:100%;background:rgba(255,255,255,0.05);border:0.5px solid rgba(200,150,240,0.2);border-radius:10px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:12px;color:#EDE0FF;outline:none;height:80px;resize:none}
+.form-textarea::placeholder{color:rgba(200,160,240,0.3);font-size:11px}
+.form-select{width:100%;background:rgba(255,255,255,0.05);border:0.5px solid rgba(200,150,240,0.2);border-radius:10px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(200,160,240,0.7);outline:none}
+.priority-row{display:flex;gap:8px}
+.pri-btn{flex:1;padding:8px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;border:0.5px solid rgba(200,150,240,0.2);background:transparent;color:rgba(200,160,240,0.55)}
+.pri-btn.active{background:rgba(155,95,216,0.25);color:#C89FE0;border-color:rgba(200,150,240,0.4)}
+
+/* Student detail */
+.stu-profile-hdr{border-radius:16px;padding:18px;background:linear-gradient(135deg,#5B2D8A,#7B40C8);margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.stu-avatar-lg{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:#EDE0FF;flex-shrink:0;border:1.5px solid rgba(255,255,255,0.2)}
+.stu-prof-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:#EDE0FF}
+.stu-prof-id{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(237,224,255,0.6);margin-top:2px}
+.info-card{border-radius:14px;padding:14px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(200,150,240,0.15);margin-bottom:10px}
+.info-card-title{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:#EDE0FF;margin-bottom:10px;letter-spacing:0.3px}
+.info-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.info-row-label{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(200,160,240,0.45);width:50px;flex-shrink:0}
+.info-row-val{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(210,185,240,0.8)}
+.perf-row{display:flex;gap:10px}
+.perf-box{flex:1;border-radius:10px;padding:10px;background:rgba(155,95,216,0.12);text-align:center}
+.perf-num{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600}
+.perf-lbl{font-family:'DM Sans',sans-serif;font-size:9px;color:rgba(200,160,240,0.5);margin-top:2px;letter-spacing:0.5px}
+.course-row{padding:8px 0;border-bottom:0.5px solid rgba(200,150,240,0.1);display:flex;justify-content:space-between;align-items:center}
+.course-row:last-child{border-bottom:none}
+.course-name{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(210,185,240,0.8)}
+.grade-badge{font-family:'DM Sans',sans-serif;font-size:10px;padding:2px 8px;border-radius:5px;background:rgba(155,95,216,0.2);color:#C89FE0;border:0.5px solid rgba(200,150,240,0.25)}
+
+/* Back button */
+.back-btn{display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(200,160,240,0.6);margin-bottom:12px;cursor:pointer}
+
+/* Page title */
+.page-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:#EDE0FF;margin-bottom:4px}
+.page-date{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(200,160,240,0.45);margin-bottom:14px}
+
+/* Oxalis mini SVG */
+.oxalis-mini{display:inline-block}
+</style>
+
+<div class="screens-wrap">
+
+<!-- 1. STUDENT HOME -->
+<div>
+<div class="phone">
+  <div class="ph-bg">
+    <svg width="300" height="620" viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg">
+      <rect width="300" height="620" fill="#1a0d2e"/>
+      <radialGradient id="rg1" cx="20%" cy="15%" r="55%"><stop offset="0%" stop-color="#5B2D8A" stop-opacity="0.6"/><stop offset="100%" stop-color="#1a0d2e" stop-opacity="0"/></radialGradient>
+      <rect width="300" height="620" fill="url(#rg1)"/>
+      <g transform="translate(265,80) rotate(15)" opacity="0.08">
+        <g transform="rotate(-90)"><path d="M0,0 C-8,-26 -30,-26 -30,-13 C-30,0 0,13 0,0 Z" fill="#C89FE0"/><path d="M0,0 C8,-26 30,-26 30,-13 C30,0 0,13 0,0 Z" fill="#C89FE0"/></g>
+        <g transform="rotate(30)"><path d="M0,0 C-8,-26 -30,-26 -30,-13 C-30,0 0,13 0,0 Z" fill="#D4AEEF"/><path d="M0,0 C8,-26 30,-26 30,-13 C30,0 0,13 0,0 Z" fill="#D4AEEF"/></g>
+        <g transform="rotate(150)"><path d="M0,0 C-8,-26 -30,-26 -30,-13 C-30,0 0,13 0,0 Z" fill="#C89FE0"/><path d="M0,0 C8,-26 30,-26 30,-13 C30,0 0,13 0,0 Z" fill="#C89FE0"/></g>
+        <circle r="5" fill="#F0C040"/>
+      </g>
+    </svg>
+  </div>
+  <div class="ph-content">
+    <div class="hdr">
+      <div class="hdr-menu"><span></span><span></span><span style="width:70%"></span></div>
+      <div class="hdr-brand" style="align-items:center">
+        <span class="hdr-title">Oxalis Hub</span>
+        <span class="hdr-role">Student</span>
+      </div>
+      <div class="notif-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 014 4v2.5l1 1.5H2L3 7.5V5a4 4 0 014-4z" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/><path d="M5.5 11.5a1.5 1.5 0 003 0" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/></svg>
+        <div class="notif-dot">3</div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="welcome-banner">
+        <div class="wb-title">Welcome back, John!</div>
+        <div class="wb-sub" style="margin-top:4px">You have 3 classes today</div>
+        <div class="wb-deco">
+          <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+            <g transform="translate(40,38) rotate(-90)"><path d="M0,0 C-8,-28 -32,-28 -32,-14 C-32,0 0,14 0,0 Z" fill="#EDE0FF"/><path d="M0,0 C8,-28 32,-28 32,-14 C32,0 0,14 0,0 Z" fill="#EDE0FF"/></g>
+            <g transform="translate(40,38) rotate(30)"><path d="M0,0 C-8,-28 -32,-28 -32,-14 C-32,0 0,14 0,0 Z" fill="#EDE0FF"/><path d="M0,0 C8,-28 32,-28 32,-14 C32,0 0,14 0,0 Z" fill="#EDE0FF"/></g>
+            <g transform="translate(40,38) rotate(150)"><path d="M0,0 C-8,-28 -32,-28 -32,-14 C-32,0 0,14 0,0 Z" fill="#EDE0FF"/><path d="M0,0 C8,-28 32,-28 32,-14 C32,0 0,14 0,0 Z" fill="#EDE0FF"/></g>
+            <circle cx="40" cy="38" r="5" fill="#F0C040"/>
+          </svg>
+        </div>
+      </div>
+      <div class="sec-label">Quick Actions</div>
+      <div class="qa-grid">
+        <div class="qa-card">
+          <div class="qa-icon" style="background:rgba(155,95,216,0.2)"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="3" stroke="#C89FE0" stroke-width="1"/><path d="M7.5 1v2M7.5 12v2M1 7.5h2M12 7.5h2" stroke="#C89FE0" stroke-width="1" stroke-linecap="round"/></svg></div>
+          <span class="qa-label">Find Path</span>
+        </div>
+        <div class="qa-card">
+          <div class="qa-icon" style="background:rgba(120,80,200,0.2)"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="2" y="2" width="11" height="11" rx="2" stroke="#9B7EC8" stroke-width="1"/><path d="M5 1v3M10 1v3M2 6h11" stroke="#9B7EC8" stroke-width="1" stroke-linecap="round"/></svg></div>
+          <span class="qa-label">My Schedule</span>
+        </div>
+        <div class="qa-card">
+          <div class="qa-icon" style="background:rgba(200,100,150,0.15)"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1a4 4 0 014 4v2.5l1 1.5H2.5L3.5 7.5V5a4 4 0 014-4z" stroke="#E890B0" stroke-width="1" fill="none"/><path d="M6 12a1.5 1.5 0 003 0" stroke="#E890B0" stroke-width="1" fill="none"/></svg></div>
+          <span class="qa-label">Notifications</span>
+        </div>
+        <div class="qa-card">
+          <div class="qa-icon" style="background:rgba(80,180,130,0.15)"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 13l4-4m0 0l2-6 2 6m-4 0h4m2 4l-4-4" stroke="#7BC47A" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+          <span class="qa-label">Navigate</span>
+        </div>
+      </div>
+      <div class="sec-label">Recent Notifications</div>
+      <div class="notif-item">
+        <div class="notif-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 014 4v2.5l1 1.5H2L3 7.5V5a4 4 0 014-4z" stroke="#C89FE0" stroke-width="1" fill="none"/></svg></div>
+        <div>
+          <div class="notif-title">Class Cancelled</div>
+          <div class="notif-body">Math 101 class is cancelled today</div>
+          <div class="notif-time">10 mins ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="1.5" stroke="#C89FE0" stroke-width="1"/><path d="M4 7h6M4 5h6M4 9h4" stroke="#C89FE0" stroke-width="1" stroke-linecap="round"/></svg></div>
+        <div>
+          <div class="notif-title">New Assignment</div>
+          <div class="notif-body">Programming assignment due Friday</div>
+          <div class="notif-time">1 hour ago</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="phone-label">Student Home</div>
+</div>
+
+<!-- 2. STUDENT SCHEDULE -->
+<div>
+<div class="phone">
+  <div class="ph-bg"><svg width="300" height="620" viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="620" fill="#1a0d2e"/><radialGradient id="rg2" cx="80%" cy="10%" r="50%"><stop offset="0%" stop-color="#5B2D8A" stop-opacity="0.5"/><stop offset="100%" stop-color="#1a0d2e" stop-opacity="0"/></radialGradient><rect width="300" height="620" fill="url(#rg2)"/></svg></div>
+  <div class="ph-content">
+    <div class="hdr">
+      <div class="hdr-menu"><span></span><span></span><span style="width:70%"></span></div>
+      <div class="hdr-brand" style="align-items:center"><span class="hdr-title">Oxalis Hub</span><span class="hdr-role">Student</span></div>
+      <div class="notif-btn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 014 4v2.5l1 1.5H2L3 7.5V5a4 4 0 014-4z" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/><path d="M5.5 11.5a1.5 1.5 0 003 0" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/></svg><div class="notif-dot">3</div></div>
+    </div>
+    <div class="page-body">
+      <div class="page-title">Today's Schedule</div>
+      <div class="page-date">Monday, December 9, 2024</div>
+      <div class="sched-item">
+        <div class="sched-top">
+          <div class="sched-dot"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#C89FE0" stroke-width="1"/><path d="M7 4v3.5l2 1.5" stroke="#C89FE0" stroke-width="1" stroke-linecap="round"/></svg></div>
+          <div><div class="sched-name">Computer Science</div><div class="sched-time">9:00 AM</div></div>
+        </div>
+        <div class="sched-meta">
+          <span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="4" r="2" stroke="rgba(200,160,240,0.5)" stroke-width="0.8"/><path d="M2 9c0-1.66 1.34-3 3-3s3 1.34 3 3" stroke="rgba(200,160,240,0.5)" stroke-width="0.8" fill="none"/></svg>Room 101 · Main Building</span>
+          <span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="4" r="2" stroke="rgba(200,160,240,0.5)" stroke-width="0.8"/><path d="M2 9c0-1.66 1.34-3 3-3s3 1.34 3 3" stroke="rgba(200,160,240,0.5)" stroke-width="0.8" fill="none"/></svg>Dr. Smith</span>
+        </div>
+        <button class="find-btn">↗ Find Path to Class</button>
+      </div>
+      <div class="sched-item">
+        <div class="sched-top">
+          <div class="sched-dot"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#C89FE0" stroke-width="1"/><path d="M7 4v3.5l2 1.5" stroke="#C89FE0" stroke-width="1" stroke-linecap="round"/></svg></div>
+          <div><div class="sched-name">Mathematics</div><div class="sched-time">11:00 AM</div></div>
+        </div>
+        <div class="sched-meta">
+          <span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="4" r="2" stroke="rgba(200,160,240,0.5)" stroke-width="0.8"/><path d="M2 9c0-1.66 1.34-3 3-3s3 1.34 3 3" stroke="rgba(200,160,240,0.5)" stroke-width="0.8" fill="none"/></svg>Room 201 · Main Building</span>
+          <span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="4" r="2" stroke="rgba(200,160,240,0.5)" stroke-width="0.8"/><path d="M2 9c0-1.66 1.34-3 3-3s3 1.34 3 3" stroke="rgba(200,160,240,0.5)" stroke-width="0.8" fill="none"/></svg>Prof. Johnson</span>
+        </div>
+        <button class="find-btn">↗ Find Path to Class</button>
+      </div>
+      <div class="sched-item">
+        <div class="sched-top">
+          <div class="sched-dot"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#C89FE0" stroke-width="1"/><path d="M7 4v3.5l2 1.5" stroke="#C89FE0" stroke-width="1" stroke-linecap="round"/></svg></div>
+          <div><div class="sched-name">Chemistry Lab</div><div class="sched-time">2:00 PM</div></div>
+        </div>
+        <div class="sched-meta">
+          <span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="4" r="2" stroke="rgba(200,160,240,0.5)" stroke-width="0.8"/><path d="M2 9c0-1.66 1.34-3 3-3s3 1.34 3 3" stroke="rgba(200,160,240,0.5)" stroke-width="0.8" fill="none"/></svg>Lab 301 · Science Building</span>
+          <span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="4" r="2" stroke="rgba(200,160,240,0.5)" stroke-width="0.8"/><path d="M2 9c0-1.66 1.34-3 3-3s3 1.34 3 3" stroke="rgba(200,160,240,0.5)" stroke-width="0.8" fill="none"/></svg>Dr. Lee</span>
+        </div>
+        <button class="find-btn">↗ Find Path to Class</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="phone-label">Student Schedule</div>
+</div>
+
+<!-- 3. CAMPUS MAP -->
+<div>
+<div class="phone">
+  <div class="ph-bg"><svg width="300" height="620" viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="620" fill="#1a0d2e"/><radialGradient id="rg3" cx="50%" cy="5%" r="60%"><stop offset="0%" stop-color="#3D1A6A" stop-opacity="0.7"/><stop offset="100%" stop-color="#1a0d2e" stop-opacity="0"/></radialGradient><rect width="300" height="620" fill="url(#rg3)"/></svg></div>
+  <div class="ph-content">
+    <div class="hdr">
+      <div class="hdr-menu"><span></span><span></span><span style="width:70%"></span></div>
+      <div class="hdr-brand" style="align-items:center"><span class="hdr-title">Oxalis Hub</span><span class="hdr-role">Student</span></div>
+      <div class="notif-btn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 014 4v2.5l1 1.5H2L3 7.5V5a4 4 0 014-4z" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/><path d="M5.5 11.5a1.5 1.5 0 003 0" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/></svg><div class="notif-dot">3</div></div>
+    </div>
+    <div class="page-body">
+      <div class="page-title">Campus Map</div>
+      <div class="search-bar">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="rgba(200,160,240,0.5)" stroke-width="1"/><path d="M9 9l2.5 2.5" stroke="rgba(200,160,240,0.5)" stroke-width="1" stroke-linecap="round"/></svg>
+        <input placeholder="Search rooms, buildings..." readonly/>
+      </div>
+      <div class="map-area">
+        <svg width="268" height="140" viewBox="0 0 268 140" xmlns="http://www.w3.org/2000/svg">
+          <!-- Grid lines -->
+          <line x1="0" y1="70" x2="268" y2="70" stroke="rgba(200,150,240,0.08)" stroke-width="0.5"/>
+          <line x1="134" y1="0" x2="134" y2="140" stroke="rgba(200,150,240,0.08)" stroke-width="0.5"/>
+          <!-- Buildings -->
+          <rect x="30" y="30" width="60" height="40" rx="4" fill="rgba(155,95,216,0.12)" stroke="rgba(200,150,240,0.2)" stroke-width="0.5"/>
+          <text x="60" y="53" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(200,160,240,0.6)">Main Bldg</text>
+          <rect x="170" y="20" width="50" height="35" rx="4" fill="rgba(155,95,216,0.1)" stroke="rgba(200,150,240,0.15)" stroke-width="0.5"/>
+          <text x="195" y="40" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(200,160,240,0.5)">Science</text>
+          <rect x="100" y="90" width="70" height="35" rx="4" fill="rgba(155,95,216,0.08)" stroke="rgba(200,150,240,0.12)" stroke-width="0.5"/>
+          <text x="135" y="110" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(200,160,240,0.45)">Library</text>
+          <!-- Paths -->
+          <path d="M90 50 L100 90" stroke="rgba(200,150,240,0.15)" stroke-width="1.5" stroke-dasharray="3,3" fill="none"/>
+          <path d="M170 37 L170 90" stroke="rgba(200,150,240,0.12)" stroke-width="1" stroke-dasharray="3,3" fill="none"/>
+          <!-- You are here -->
+          <circle cx="90" cy="90" r="5" fill="#9B5FD8" opacity="0.9"/>
+          <circle cx="90" cy="90" r="9" fill="rgba(155,95,216,0.2)"/>
+        </svg>
+        <div class="map-you" style="top:auto;bottom:10px;left:50%;transform:translateX(-50%)">
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><circle cx="4" cy="4" r="3" fill="#9B5FD8"/></svg>
+          You are here
+        </div>
+      </div>
+      <div class="sec-label">Available Rooms</div>
+      <div class="room-item">
+        <div class="room-left"><div class="room-name">Room 101</div><div class="room-loc">Main Building · Floor 1</div><div class="room-prof">Dr. Smith (Computer Science)</div></div>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="rgba(200,160,240,0.4)" stroke-width="1" stroke-linecap="round"/></svg>
+      </div>
+      <div class="room-item">
+        <div class="room-left"><div class="room-name">Room 201</div><div class="room-loc">Main Building · Floor 2</div><div class="room-prof">Prof. Johnson (Mathematics)</div></div>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="rgba(200,160,240,0.4)" stroke-width="1" stroke-linecap="round"/></svg>
+      </div>
+      <div class="room-item">
+        <div class="room-left"><div class="room-name">Lab 301</div><div class="room-loc">Science Building · Floor 3</div><div class="room-prof">Dr. Lee (Chemistry)</div></div>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="rgba(200,160,240,0.4)" stroke-width="1" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="phone-label">Campus Map</div>
+</div>
+
+<!-- 4. TEACHER HOME -->
+<div>
+<div class="phone">
+  <div class="ph-bg"><svg width="300" height="620" viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="620" fill="#1a0d2e"/><radialGradient id="rg4" cx="80%" cy="20%" r="55%"><stop offset="0%" stop-color="#4A1D7A" stop-opacity="0.65"/><stop offset="100%" stop-color="#1a0d2e" stop-opacity="0"/></radialGradient><rect width="300" height="620" fill="url(#rg4)"/><g transform="translate(260,560) rotate(-20)" opacity="0.07"><g transform="rotate(-90)"><path d="M0,0 C-7,-22 -26,-22 -26,-11 C-26,0 0,11 0,0 Z" fill="#C89FE0"/><path d="M0,0 C7,-22 26,-22 26,-11 C26,0 0,11 0,0 Z" fill="#C89FE0"/></g><g transform="rotate(30)"><path d="M0,0 C-7,-22 -26,-22 -26,-11 C-26,0 0,11 0,0 Z" fill="#D4AEEF"/><path d="M0,0 C7,-22 26,-22 26,-11 C26,0 0,11 0,0 Z" fill="#D4AEEF"/></g><g transform="rotate(150)"><path d="M0,0 C-7,-22 -26,-22 -26,-11 C-26,0 0,11 0,0 Z" fill="#C89FE0"/><path d="M0,0 C7,-22 26,-22 26,-11 C26,0 0,11 0,0 Z" fill="#C89FE0"/></g><circle r="4" fill="#F0C040"/></g></svg></div>
+  <div class="ph-content">
+    <div class="hdr">
+      <div class="hdr-menu"><span></span><span></span><span style="width:70%"></span></div>
+      <div class="hdr-brand" style="align-items:center"><span class="hdr-title">Oxalis Hub</span><span class="hdr-role">Teacher</span></div>
+      <div class="notif-btn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 014 4v2.5l1 1.5H2L3 7.5V5a4 4 0 014-4z" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/><path d="M5.5 11.5a1.5 1.5 0 003 0" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/></svg><div class="notif-dot">3</div></div>
+    </div>
+    <div class="page-body">
+      <div class="welcome-banner">
+        <div class="wb-title">Welcome back, Dr. Smith!</div>
+        <div class="wb-sub" style="margin-top:4px">You have 2 classes today</div>
+        <div class="wb-deco"><svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><g transform="translate(40,38) rotate(-90)"><path d="M0,0 C-8,-28 -32,-28 -32,-14 C-32,0 0,14 0,0 Z" fill="#EDE0FF"/><path d="M0,0 C8,-28 32,-28 32,-14 C32,0 0,14 0,0 Z" fill="#EDE0FF"/></g><g transform="translate(40,38) rotate(30)"><path d="M0,0 C-8,-28 -32,-28 -32,-14 C-32,0 0,14 0,0 Z" fill="#EDE0FF"/><path d="M0,0 C8,-28 32,-28 32,-14 C32,0 0,14 0,0 Z" fill="#EDE0FF"/></g><g transform="translate(40,38) rotate(150)"><path d="M0,0 C-8,-28 -32,-28 -32,-14 C-32,0 0,14 0,0 Z" fill="#EDE0FF"/><path d="M0,0 C8,-28 32,-28 32,-14 C32,0 0,14 0,0 Z" fill="#EDE0FF"/></g><circle cx="40" cy="38" r="5" fill="#F0C040"/></svg></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num" style="color:#C89FE0">4</div><div class="stat-lbl">Students</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:#9B7EC8">3</div><div class="stat-lbl">Courses</div></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num" style="color:#7BC47A">95%</div><div class="stat-lbl">Avg Attendance</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:#E890B0">3</div><div class="stat-lbl">Sent Notices</div></div>
+      </div>
+      <div class="sec-label">Quick Actions</div>
+      <div class="qa-grid">
+        <div class="qa-card">
+          <div class="qa-icon" style="background:rgba(155,95,216,0.2)"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 13l3.5-3.5M7 2l6 6-3.5 3.5L3.5 5.5 7 2z" stroke="#C89FE0" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="qa-label">Send Notice</span>
+        </div>
+        <div class="qa-card">
+          <div class="qa-icon" style="background:rgba(120,80,200,0.2)"><svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="5" cy="5" r="3" stroke="#9B7EC8" stroke-width="1"/><circle cx="10" cy="10" r="3" stroke="#9B7EC8" stroke-width="1"/><path d="M7.5 5H11M4 10H7.5" stroke="#9B7EC8" stroke-width="1" stroke-linecap="round"/></svg></div>
+          <span class="qa-label">View Students</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="phone-label">Teacher Home</div>
+</div>
+
+<!-- 5. MY STUDENTS -->
+<div>
+<div class="phone">
+  <div class="ph-bg"><svg width="300" height="620" viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="620" fill="#1a0d2e"/><radialGradient id="rg5" cx="20%" cy="80%" r="50%"><stop offset="0%" stop-color="#3D1A6A" stop-opacity="0.5"/><stop offset="100%" stop-color="#1a0d2e" stop-opacity="0"/></radialGradient><rect width="300" height="620" fill="url(#rg5)"/></svg></div>
+  <div class="ph-content">
+    <div class="hdr">
+      <div class="hdr-menu"><span></span><span></span><span style="width:70%"></span></div>
+      <div class="hdr-brand" style="align-items:center"><span class="hdr-title">Oxalis Hub</span><span class="hdr-role">Teacher</span></div>
+      <div class="notif-btn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 014 4v2.5l1 1.5H2L3 7.5V5a4 4 0 014-4z" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/><path d="M5.5 11.5a1.5 1.5 0 003 0" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/></svg><div class="notif-dot">3</div></div>
+    </div>
+    <div class="page-body">
+      <div class="page-title">My Students</div>
+      <div class="search-bar" style="margin-bottom:10px">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="rgba(200,160,240,0.5)" stroke-width="1"/><path d="M9 9l2.5 2.5" stroke="rgba(200,160,240,0.5)" stroke-width="1" stroke-linecap="round"/></svg>
+        <input placeholder="Search by name or ID..." readonly/>
+      </div>
+      <!-- Stats strip -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(200,150,240,0.12)">
+        <div style="flex:1;text-align:center"><div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:#C89FE0">4</div><div style="font-family:'DM Sans',sans-serif;font-size:9px;color:rgba(200,160,240,0.45);margin-top:1px">Total</div></div>
+        <div style="flex:1;text-align:center"><div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:#7BC47A">95%</div><div style="font-family:'DM Sans',sans-serif;font-size:9px;color:rgba(200,160,240,0.45);margin-top:1px">Avg Attend.</div></div>
+        <div style="flex:1;text-align:center"><div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:#E890B0">3.80</div><div style="font-family:'DM Sans',sans-serif;font-size:9px;color:rgba(200,160,240,0.45);margin-top:1px">Avg GPA</div></div>
+      </div>
+      <div class="student-item">
+        <div class="avatar">JD</div>
+        <div><div class="stu-name">John Doe</div><div class="stu-id">ST2021001</div><div><span class="tag">Computer Science</span><span class="tag">3rd Year</span></div></div>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-left:auto;flex-shrink:0"><path d="M5 3l4 4-4 4" stroke="rgba(200,160,240,0.4)" stroke-width="1" stroke-linecap="round"/></svg>
+      </div>
+      <div class="student-item">
+        <div class="avatar">JS</div>
+        <div><div class="stu-name">Jane Smith</div><div class="stu-id">ST2021002</div><div><span class="tag">Mathematics</span><span class="tag">2nd Year</span></div></div>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-left:auto;flex-shrink:0"><path d="M5 3l4 4-4 4" stroke="rgba(200,160,240,0.4)" stroke-width="1" stroke-linecap="round"/></svg>
+      </div>
+      <div class="student-item">
+        <div class="avatar">MJ</div>
+        <div><div class="stu-name">Mike Johnson</div><div class="stu-id">ST2020003</div><div><span class="tag">Physics</span><span class="tag">4th Year</span></div></div>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-left:auto;flex-shrink:0"><path d="M5 3l4 4-4 4" stroke="rgba(200,160,240,0.4)" stroke-width="1" stroke-linecap="round"/></svg>
+      </div>
+      <div class="student-item">
+        <div class="avatar">SW</div>
+        <div><div class="stu-name">Sarah Williams</div><div class="stu-id">ST2021004</div><div><span class="tag">Computer Science</span><span class="tag">3rd Year</span></div></div>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-left:auto;flex-shrink:0"><path d="M5 3l4 4-4 4" stroke="rgba(200,160,240,0.4)" stroke-width="1" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="phone-label">My Students</div>
+</div>
+
+<!-- 6. STUDENT DETAIL -->
+<div>
+<div class="phone">
+  <div class="ph-bg"><svg width="300" height="620" viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="620" fill="#1a0d2e"/><radialGradient id="rg6" cx="50%" cy="30%" r="55%"><stop offset="0%" stop-color="#5B2D8A" stop-opacity="0.55"/><stop offset="100%" stop-color="#1a0d2e" stop-opacity="0"/></radialGradient><rect width="300" height="620" fill="url(#rg6)"/></svg></div>
+  <div class="ph-content">
+    <div class="hdr">
+      <div style="display:flex;align-items:center;gap:6px;cursor:pointer"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="rgba(200,160,240,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg><span style="font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(200,160,240,0.6)">Back</span></div>
+      <div class="hdr-brand" style="align-items:center"><span class="hdr-title">Oxalis Hub</span><span class="hdr-role">Teacher</span></div>
+      <div class="notif-btn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 014 4v2.5l1 1.5H2L3 7.5V5a4 4 0 014-4z" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/><path d="M5.5 11.5a1.5 1.5 0 003 0" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/></svg><div class="notif-dot">3</div></div>
+    </div>
+    <div class="page-body">
+      <div class="stu-profile-hdr">
+        <div class="stu-avatar-lg">JD</div>
+        <div>
+          <div class="stu-prof-name">John Doe</div>
+          <div class="stu-prof-id">ST2021001</div>
+          <span class="tag" style="margin-top:6px;display:inline-block">Computer Science</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Contact Information</div>
+        <div class="info-row"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="2.5" width="9" height="6" rx="1.5" stroke="rgba(200,160,240,0.45)" stroke-width="0.8"/><path d="M1 4l4.5 3L10 4" stroke="rgba(200,160,240,0.45)" stroke-width="0.8" fill="none"/></svg><div><div style="font-family:'DM Sans',sans-serif;font-size:9px;color:rgba(200,160,240,0.4)">Email</div><div style="font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(210,185,240,0.75)">john.doe@university.edu</div></div></div>
+        <div class="info-row"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2 2a1 1 0 011-1h1.5l1 2.5-1.5 1a6 6 0 003.5 3.5l1-1.5L10 7.5V9a1 1 0 01-1 1C4 10 1 7 1 3a1 1 0 011-1z" stroke="rgba(200,160,240,0.45)" stroke-width="0.8" fill="none"/></svg><div><div style="font-family:'DM Sans',sans-serif;font-size:9px;color:rgba(200,160,240,0.4)">Phone</div><div style="font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(210,185,240,0.75)">+976 9999-1234</div></div></div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Academic Performance</div>
+        <div class="perf-row">
+          <div class="perf-box"><div class="perf-num" style="color:#C89FE0">3.85</div><div class="perf-lbl">GPA</div></div>
+          <div class="perf-box"><div class="perf-num" style="color:#7BC47A">95%</div><div class="perf-lbl">Attendance</div></div>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Current Courses</div>
+        <div class="course-row"><span class="course-name">Data Structures</span><span class="grade-badge">A</span></div>
+        <div class="course-row"><span class="course-name">Algorithms</span><span class="grade-badge">A−</span></div>
+        <div class="course-row"><span class="course-name">Database Systems</span><span class="grade-badge">B+</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="phone-label">Student Detail</div>
+</div>
+
+<!-- 7. ANNOUNCEMENTS -->
+<div>
+<div class="phone">
+  <div class="ph-bg"><svg width="300" height="620" viewBox="0 0 300 620" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="620" fill="#1a0d2e"/><radialGradient id="rg7" cx="70%" cy="5%" r="55%"><stop offset="0%" stop-color="#4A1D7A" stop-opacity="0.6"/><stop offset="100%" stop-color="#1a0d2e" stop-opacity="0"/></radialGradient><rect width="300" height="620" fill="url(#rg7)"/></svg></div>
+  <div class="ph-content">
+    <div class="hdr">
+      <div class="hdr-menu"><span></span><span></span><span style="width:70%"></span></div>
+      <div class="hdr-brand" style="align-items:center"><span class="hdr-title">Oxalis Hub</span><span class="hdr-role">Teacher</span></div>
+      <div class="notif-btn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 014 4v2.5l1 1.5H2L3 7.5V5a4 4 0 014-4z" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/><path d="M5.5 11.5a1.5 1.5 0 003 0" stroke="rgba(200,160,240,0.8)" stroke-width="1" fill="none"/></svg><div class="notif-dot">3</div></div>
+    </div>
+    <div class="page-body">
+      <div class="page-title">Create Announcement</div>
+      <div style="border-radius:16px;padding:16px;background:rgba(255,255,255,0.04);border:0.5px solid rgba(200,150,240,0.15);margin-bottom:14px">
+        <div class="form-field">
+          <label class="form-label">Title</label>
+          <input class="form-input" type="text" placeholder="Enter title..." readonly/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Message</label>
+          <textarea class="form-textarea" placeholder="Enter message..." readonly></textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Send To</label>
+          <select class="form-select"><option>All Students</option></select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Priority</label>
+          <div class="priority-row">
+            <button class="pri-btn">Low</button>
+            <button class="pri-btn active">Normal</button>
+            <button class="pri-btn">High</button>
+          </div>
+        </div>
+        <button class="find-btn" style="margin-top:4px">↗ Send Now</button>
+      </div>
+      <div class="sec-label">Recent Announcements</div>
+      <div class="notif-item">
+        <div class="notif-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 13l4-4m0 0L8 3l4 4-2 6m-4-4h4m2 4l-4-4" stroke="#C89FE0" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+        <div><div class="notif-title">Class Cancelled</div><div class="notif-body">Math 101 class is cancelled today</div><div class="notif-time">10 mins ago</div></div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="1.5" stroke="#C89FE0" stroke-width="1"/><path d="M4 7h6M4 5h6M4 9h4" stroke="#C89FE0" stroke-width="1" stroke-linecap="round"/></svg></div>
+        <div><div class="notif-title">New Assignment</div><div class="notif-body">Programming assignment due Friday</div><div class="notif-time">1 hour ago</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="phone-label">Announcements</div>
+</div>
+
+</div>
