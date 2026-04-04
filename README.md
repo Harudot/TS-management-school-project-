@@ -1,4 +1,4 @@
-# 📱 Smart Campus Navigation App
+# 📱 Oxalis Hub
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.x-blue?logo=dart)
@@ -9,7 +9,7 @@
 
 ## 📌 Project Overview
 
-Smart Campus Navigation нь их сургуулийн кампус доторх барилга, анги танхим, үйлчилгээний байршлыг хялбар олох боломж олгодог мобайл аппликейшн юм.
+Oxalis Hub нь их сургуулийн кампус доторх барилга, анги танхим, үйлчилгээний байршлыг хялбар олох боломж олгодог мобайл аппликейшн юм.
 
 Энэхүү апп нь хэрэглэгчийн байршилд тулгуурлан хамгийн ойр замыг харуулж, QR код болон газрын зураг ашиглан навигаци хийдэг.
 
