@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ts_management/widgets/login_widgets/signup_bottom.dart';
-import 'package:ts_management/widgets/login_widgets/signup_form.dart';
+import 'package:ts_management/widgets/signup/signup_bottom.dart';
+import 'package:ts_management/widgets/signup/signup_form.dart';
 
 class SignUpSheet extends StatefulWidget {
   const SignUpSheet({super.key});
