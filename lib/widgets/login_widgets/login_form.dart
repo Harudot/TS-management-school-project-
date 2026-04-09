@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:ts_management/screens/home_screen.dart';
+import 'package:ts_management/services/auth_service.dart';
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {
   const LoginForm({
     super.key,
     required this.emailController,
@@ -17,6 +19,43 @@ class LoginForm extends StatelessWidget {
   final bool obscurePassword;
   final ValueChanged<bool?> onRememberMeChanged;
   final VoidCallback onTogglePassword;
+
+  @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  bool _loading = false;
+
+  Future<void> _handleSignIn() async {
+    setState(() => _loading = true);
+
+    final user = await AuthService.login(
+      email: widget.emailController.text,
+      password: widget.passwordController.text,
+    );
+
+    if (!mounted) return;
+    setState(() => _loading = false);
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('И-мэйл эсвэл нууц үг буруу байна'),
+          backgroundColor: Colors.redAccent.shade200,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +76,6 @@ class LoginForm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Heading ──
           const Text(
             'Welcome back',
             style: TextStyle(
@@ -54,46 +92,28 @@ class LoginForm extends StatelessWidget {
               fontSize: 12,
             ),
           ),
-
           const SizedBox(height: 16),
-
-          // ── Email ──
           _FieldLabel('EMAIL'),
           const SizedBox(height: 6),
-          _EmailField(controller: emailController),
-
+          _EmailField(controller: widget.emailController),
           const SizedBox(height: 12),
-
-          // ── Password ──
           _FieldLabel('PASSWORD'),
           const SizedBox(height: 6),
           _PasswordField(
-            controller: passwordController,
-            obscure: obscurePassword,
-            onToggle: onTogglePassword,
+            controller: widget.passwordController,
+            obscure: widget.obscurePassword,
+            onToggle: widget.onTogglePassword,
           ),
-
           const SizedBox(height: 10),
-
-          // ── Remember / Forgot ──
           _RememberForgotRow(
-            rememberMe: rememberMe,
-            onChanged: onRememberMeChanged,
+            rememberMe: widget.rememberMe,
+            onChanged: widget.onRememberMeChanged,
           ),
-
           const SizedBox(height: 16),
-
-          // ── Sign In Button ──
-          const _SignInButton(),
-
+          _SignInButton(onPressed: _handleSignIn, isLoading: _loading),
           const SizedBox(height: 14),
-
-          // ── OR Divider ──
           const _OrDivider(),
-
           const SizedBox(height: 14),
-
-          // ── Google Button ──
           const _GoogleButton(),
         ],
       ),
@@ -101,36 +121,24 @@ class LoginForm extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Field Label
-// ─────────────────────────────────────────────
-
 class _FieldLabel extends StatelessWidget {
   const _FieldLabel(this.text);
   final String text;
-
   @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: Colors.white.withOpacity(0.5),
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 1.5,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Text(
+    text,
+    style: TextStyle(
+      color: Colors.white.withOpacity(0.5),
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 1.5,
+    ),
+  );
 }
-
-// ─────────────────────────────────────────────
-// Email Field
-// ─────────────────────────────────────────────
 
 class _EmailField extends StatelessWidget {
   const _EmailField({required this.controller});
   final TextEditingController controller;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -165,21 +173,15 @@ class _EmailField extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Password Field
-// ─────────────────────────────────────────────
-
 class _PasswordField extends StatelessWidget {
   const _PasswordField({
     required this.controller,
     required this.obscure,
     required this.onToggle,
   });
-
   final TextEditingController controller;
   final bool obscure;
   final VoidCallback onToggle;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -224,16 +226,10 @@ class _PasswordField extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Remember Me + Forgot Password Row
-// ─────────────────────────────────────────────
-
 class _RememberForgotRow extends StatelessWidget {
   const _RememberForgotRow({required this.rememberMe, required this.onChanged});
-
   final bool rememberMe;
   final ValueChanged<bool?> onChanged;
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -280,13 +276,10 @@ class _RememberForgotRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Sign In Button
-// ─────────────────────────────────────────────
-
 class _SignInButton extends StatelessWidget {
-  const _SignInButton();
-
+  const _SignInButton({required this.onPressed, this.isLoading = false});
+  final VoidCallback onPressed;
+  final bool isLoading;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -309,7 +302,7 @@ class _SignInButton extends StatelessWidget {
           ],
         ),
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: isLoading ? null : onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
@@ -317,28 +310,32 @@ class _SignInButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
             ),
           ),
-          child: const Text(
-            'Sign In',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.3,
-            ),
-          ),
+          child: isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : const Text(
+                  'Sign In',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
         ),
       ),
     );
   }
 }
 
-// ─────────────────────────────────────────────
-// OR Divider
-// ─────────────────────────────────────────────
-
 class _OrDivider extends StatelessWidget {
   const _OrDivider();
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -366,13 +363,8 @@ class _OrDivider extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Google Button
-// ─────────────────────────────────────────────
-
 class _GoogleButton extends StatelessWidget {
   const _GoogleButton();
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -401,60 +393,50 @@ class _GoogleButton extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Google Logo
-// ─────────────────────────────────────────────
-
 class _GoogleLogo extends StatelessWidget {
   const _GoogleLogo();
-
   @override
-  Widget build(BuildContext context) {
-    return CustomPaint(size: const Size(20, 20), painter: _GoogleLogoPainter());
-  }
+  Widget build(BuildContext context) =>
+      CustomPaint(size: const Size(20, 20), painter: _GoogleLogoPainter());
 }
 
 class _GoogleLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final double cx = size.width / 2;
-    final double cy = size.height / 2;
-    final double r = size.width / 2;
-
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final r = size.width / 2;
     final segments = [
       (Colors.red, -15.0, 95.0),
       (Colors.amber, 80.0, 100.0),
       (Colors.green, 175.0, 100.0),
       (const Color(0xFF4285F4), 270.0, 105.0),
     ];
-
     final rect = Rect.fromCircle(center: Offset(cx, cy), radius: r);
-
     for (final seg in segments) {
-      final paint = Paint()
-        ..color = seg.$1 as Color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = size.width * 0.22
-        ..strokeCap = StrokeCap.butt;
-
       canvas.drawArc(
         rect.deflate(size.width * 0.11),
         (seg.$2 as double) * (3.14159 / 180),
         (seg.$3 as double) * (3.14159 / 180),
         false,
-        paint,
+        Paint()
+          ..color = seg.$1 as Color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = size.width * 0.22
+          ..strokeCap = StrokeCap.butt,
       );
     }
-
-    final barPaint = Paint()
-      ..color = const Color(0xFF4285F4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.22
-      ..strokeCap = StrokeCap.butt;
-
-    canvas.drawLine(Offset(cx, cy), Offset(cx + r * 0.78, cy), barPaint);
+    canvas.drawLine(
+      Offset(cx, cy),
+      Offset(cx + r * 0.78, cy),
+      Paint()
+        ..color = const Color(0xFF4285F4)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = size.width * 0.22
+        ..strokeCap = StrokeCap.butt,
+    );
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter old) => false;
 }
