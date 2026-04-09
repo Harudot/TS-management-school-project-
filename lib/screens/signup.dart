@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ts_management/services/auth_service.dart';
 import 'package:ts_management/widgets/signup/signup_bottom.dart';
 import 'package:ts_management/widgets/signup/signup_form.dart';
 
@@ -16,6 +17,7 @@ class _SignUpSheetState extends State<SignUpSheet> {
   final TextEditingController _confirmController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
+  bool _loading = false;
 
   @override
   void dispose() {
@@ -26,8 +28,45 @@ class _SignUpSheetState extends State<SignUpSheet> {
     super.dispose();
   }
 
-  void _handleSignUp() {
-    // TODO: sign up logic here
+  Future<void> _handleSignUp() async {
+    setState(() => _loading = true);
+
+    final error = await AuthService.signUp(
+      name: _nameController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+      confirmPassword: _confirmController.text,
+    );
+
+    if (!mounted) return;
+    setState(() => _loading = false);
+
+    if (error != null) {
+      // ── Алдаа ──
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error),
+          backgroundColor: const Color(0xFF7340E8),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    } else {
+      // ── Амжилттай → sheet хааж, мессеж харуулах ──
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Бүртгэл амжилттай! Нэвтэрнэ үү.'),
+          backgroundColor: const Color(0xFF43E97B),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -44,8 +83,8 @@ class _SignUpSheetState extends State<SignUpSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Drag Handle ──
           const SizedBox(height: 12),
+          // Drag handle
           Container(
             width: 40,
             height: 4,
@@ -55,14 +94,11 @@ class _SignUpSheetState extends State<SignUpSheet> {
             ),
           ),
           const SizedBox(height: 6),
-
-          // ── Scrollable Content ──
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
               child: Column(
                 children: [
-                  // ── Part 2: Registration Form ──
                   SignUpForm(
                     nameController: _nameController,
                     emailController: _emailController,
@@ -74,14 +110,11 @@ class _SignUpSheetState extends State<SignUpSheet> {
                         setState(() => _obscurePassword = !_obscurePassword),
                     onToggleConfirm: () =>
                         setState(() => _obscureConfirm = !_obscureConfirm),
-                    onSignUp: _handleSignUp,
+                    onSignUp: _loading ? () {} : _handleSignUp,
+                    isLoading: _loading,
                   ),
-
                   const SizedBox(height: 14),
-
-                  // ── Part 3: Already have account ──
                   SignUpBottom(onLoginTap: () => Navigator.pop(context)),
-
                   const SizedBox(height: 8),
                 ],
               ),

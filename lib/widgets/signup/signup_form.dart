@@ -12,6 +12,7 @@ class SignUpForm extends StatelessWidget {
     required this.onTogglePassword,
     required this.onToggleConfirm,
     required this.onSignUp,
+    this.isLoading = false,
   });
 
   final TextEditingController nameController;
@@ -23,6 +24,7 @@ class SignUpForm extends StatelessWidget {
   final VoidCallback onTogglePassword;
   final VoidCallback onToggleConfirm;
   final VoidCallback onSignUp;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +45,6 @@ class SignUpForm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Heading ──
           const Text(
             'Create account',
             style: TextStyle(
@@ -60,10 +61,7 @@ class SignUpForm extends StatelessWidget {
               fontSize: 12,
             ),
           ),
-
           const SizedBox(height: 16),
-
-          // ── Full Name ──
           const _FieldLabel('FULL NAME'),
           const SizedBox(height: 6),
           _InputField(
@@ -71,10 +69,7 @@ class SignUpForm extends StatelessWidget {
             hint: 'John Doe',
             icon: Icons.person_outline_rounded,
           ),
-
           const SizedBox(height: 12),
-
-          // ── Email ──
           const _FieldLabel('EMAIL'),
           const SizedBox(height: 6),
           _InputField(
@@ -83,10 +78,7 @@ class SignUpForm extends StatelessWidget {
             icon: Icons.mail_outline_rounded,
             keyboardType: TextInputType.emailAddress,
           ),
-
           const SizedBox(height: 12),
-
-          // ── Password ──
           const _FieldLabel('PASSWORD'),
           const SizedBox(height: 6),
           _PasswordInputField(
@@ -95,10 +87,7 @@ class SignUpForm extends StatelessWidget {
             obscure: obscurePassword,
             onToggle: onTogglePassword,
           ),
-
           const SizedBox(height: 12),
-
-          // ── Confirm Password ──
           const _FieldLabel('CONFIRM PASSWORD'),
           const SizedBox(height: 6),
           _PasswordInputField(
@@ -107,20 +96,11 @@ class SignUpForm extends StatelessWidget {
             obscure: obscureConfirm,
             onToggle: onToggleConfirm,
           ),
-
           const SizedBox(height: 18),
-
-          // ── Sign Up Button ──
-          _SignUpButton(onPressed: onSignUp),
-
+          _SignUpButton(onPressed: onSignUp, isLoading: isLoading),
           const SizedBox(height: 14),
-
-          // ── OR Divider ──
           const _OrDivider(),
-
           const SizedBox(height: 14),
-
-          // ── Google Button ──
           const _GoogleButton(),
         ],
       ),
@@ -128,31 +108,20 @@ class SignUpForm extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Field Label
-// ─────────────────────────────────────────────
-
 class _FieldLabel extends StatelessWidget {
   const _FieldLabel(this.text);
   final String text;
-
   @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: Colors.white.withOpacity(0.5),
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 1.5,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Text(
+    text,
+    style: TextStyle(
+      color: Colors.white.withOpacity(0.5),
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 1.5,
+    ),
+  );
 }
-
-// ─────────────────────────────────────────────
-// Generic Input Field
-// ─────────────────────────────────────────────
 
 class _InputField extends StatelessWidget {
   const _InputField({
@@ -161,12 +130,10 @@ class _InputField extends StatelessWidget {
     required this.icon,
     this.keyboardType = TextInputType.text,
   });
-
   final TextEditingController controller;
   final String hint;
   final IconData icon;
   final TextInputType keyboardType;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -201,10 +168,6 @@ class _InputField extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Password Input Field
-// ─────────────────────────────────────────────
-
 class _PasswordInputField extends StatelessWidget {
   const _PasswordInputField({
     required this.controller,
@@ -212,12 +175,10 @@ class _PasswordInputField extends StatelessWidget {
     required this.obscure,
     required this.onToggle,
   });
-
   final TextEditingController controller;
   final String hint;
   final bool obscure;
   final VoidCallback onToggle;
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -262,14 +223,10 @@ class _PasswordInputField extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Sign Up Button
-// ─────────────────────────────────────────────
-
 class _SignUpButton extends StatelessWidget {
-  const _SignUpButton({required this.onPressed});
+  const _SignUpButton({required this.onPressed, this.isLoading = false});
   final VoidCallback onPressed;
-
+  final bool isLoading;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -292,7 +249,7 @@ class _SignUpButton extends StatelessWidget {
           ],
         ),
         child: ElevatedButton(
-          onPressed: onPressed,
+          onPressed: isLoading ? null : onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
@@ -300,28 +257,32 @@ class _SignUpButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
             ),
           ),
-          child: const Text(
-            'Create Account',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.3,
-            ),
-          ),
+          child: isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : const Text(
+                  'Create Account',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
         ),
       ),
     );
   }
 }
 
-// ─────────────────────────────────────────────
-// OR Divider
-// ─────────────────────────────────────────────
-
 class _OrDivider extends StatelessWidget {
   const _OrDivider();
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -349,13 +310,8 @@ class _OrDivider extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Google Button
-// ─────────────────────────────────────────────
-
 class _GoogleButton extends StatelessWidget {
   const _GoogleButton();
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -384,60 +340,50 @@ class _GoogleButton extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// Google Logo
-// ─────────────────────────────────────────────
-
 class _GoogleLogo extends StatelessWidget {
   const _GoogleLogo();
-
   @override
-  Widget build(BuildContext context) {
-    return CustomPaint(size: const Size(20, 20), painter: _GoogleLogoPainter());
-  }
+  Widget build(BuildContext context) =>
+      CustomPaint(size: const Size(20, 20), painter: _GoogleLogoPainter());
 }
 
 class _GoogleLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final double cx = size.width / 2;
-    final double cy = size.height / 2;
-    final double r = size.width / 2;
-
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final r = size.width / 2;
     final segments = [
       (Colors.red, -15.0, 95.0),
       (Colors.amber, 80.0, 100.0),
       (Colors.green, 175.0, 100.0),
       (const Color(0xFF4285F4), 270.0, 105.0),
     ];
-
     final rect = Rect.fromCircle(center: Offset(cx, cy), radius: r);
-
     for (final seg in segments) {
-      final paint = Paint()
-        ..color = seg.$1 as Color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = size.width * 0.22
-        ..strokeCap = StrokeCap.butt;
-
       canvas.drawArc(
         rect.deflate(size.width * 0.11),
         (seg.$2 as double) * (3.14159 / 180),
         (seg.$3 as double) * (3.14159 / 180),
         false,
-        paint,
+        Paint()
+          ..color = seg.$1 as Color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = size.width * 0.22
+          ..strokeCap = StrokeCap.butt,
       );
     }
-
-    final barPaint = Paint()
-      ..color = const Color(0xFF4285F4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.22
-      ..strokeCap = StrokeCap.butt;
-
-    canvas.drawLine(Offset(cx, cy), Offset(cx + r * 0.78, cy), barPaint);
+    canvas.drawLine(
+      Offset(cx, cy),
+      Offset(cx + r * 0.78, cy),
+      Paint()
+        ..color = const Color(0xFF4285F4)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = size.width * 0.22
+        ..strokeCap = StrokeCap.butt,
+    );
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter old) => false;
 }

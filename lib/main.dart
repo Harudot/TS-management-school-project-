@@ -17,7 +17,7 @@ class OxalisApp extends StatelessWidget {
         fontFamily: 'SF Pro Display',
         scaffoldBackgroundColor: const Color(0xFF1A0A2E),
       ),
-      home: const LoginScreen(),
+      home: LoginScreen(),
     );
   }
 }
