@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:ts_management/screens/login.dart';
+import 'package:ts_management/screens/login_screen.dart';
 
 void main() {
-  runApp(const OxalisApp());
+  runApp(const OxalisApp(subtitle: 'Student'));
 }
 
 class OxalisApp extends StatelessWidget {
-  const OxalisApp({super.key});
+  final String subtitle;
+
+  const OxalisApp({super.key, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,7 @@ class OxalisApp extends StatelessWidget {
         fontFamily: 'SF Pro Display',
         scaffoldBackgroundColor: const Color(0xFF1A0A2E),
       ),
-      home: LoginScreen(),
+      home: const LoginScreen(),
     );
   }
 }

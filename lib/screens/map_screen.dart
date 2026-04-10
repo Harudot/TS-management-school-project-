@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ts_management/widgets/map_widgets/map_view.dart';
 import 'package:ts_management/widgets/map_widgets/map_room_list.dart';
+import 'package:ts_management/widgets/common/oxalis_app_bar.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -48,7 +49,7 @@ class _MapScreenState extends State<MapScreen> {
         child: Column(
           children: [
             // ── App Bar ──
-            _MapAppBar(),
+            const OxalisAppBar(subtitle: 'Student', showBack: true),
 
             // ── Scrollable Body ──
             Expanded(
@@ -138,74 +139,6 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _MapAppBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-      child: Row(
-        children: [
-          Icon(
-            Icons.menu_rounded,
-            color: Colors.white.withOpacity(0.7),
-            size: 24,
-          ),
-          const Expanded(
-            child: Column(
-              children: [
-                Text(
-                  'Oxalis Hub',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  'Student',
-                  style: TextStyle(color: Color(0x73FFFFFF), fontSize: 11),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E0D3A).withOpacity(0.9),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
-            ),
-            child: Stack(
-              children: [
-                Center(
-                  child: Icon(
-                    Icons.notifications_outlined,
-                    color: Colors.white.withOpacity(0.7),
-                    size: 20,
-                  ),
-                ),
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: Container(
-                    width: 7,
-                    height: 7,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF9B6BFF),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
