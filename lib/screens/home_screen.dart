@@ -22,6 +22,24 @@ class HomeScreen extends StatelessWidget {
       time: '1 hour ago',
       icon: Icons.assignment_outlined,
     ),
+    NotificationItem(
+      title: 'Grade Posted',
+      subtitle: 'Your Physics midterm grade is available',
+      time: '3 hours ago',
+      icon: Icons.grade_outlined,
+    ),
+    NotificationItem(
+      title: 'Room Changed',
+      subtitle: 'Chemistry lab moved to Room B204',
+      time: 'Yesterday',
+      icon: Icons.room_outlined,
+    ),
+    NotificationItem(
+      title: 'Exam Reminder',
+      subtitle: 'Final exam scheduled for next Monday',
+      time: '2 days ago',
+      icon: Icons.event_outlined,
+    ),
   ];
 
   @override
@@ -32,7 +50,7 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           children: [
             // ── App Bar ──
-            const OxalisAppBar(subtitle: 'Student'),
+            OxalisAppBar(subtitle: 'Student', notifications: _notifications),
 
             // ── Scrollable Body ──
             Expanded(

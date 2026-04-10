@@ -10,20 +10,19 @@ class HomeActions extends StatelessWidget {
     final actions = [
       _ActionItem(
         icon: Icons.navigation_outlined,
-        label: 'Find Path',
+        label: 'Зам хайх',
         key: 'find_path',
       ),
       _ActionItem(
         icon: Icons.calendar_month_outlined,
-        label: 'My Schedule',
+        label: 'Миний хуваарь',
         key: 'schedule',
       ),
       _ActionItem(
         icon: Icons.notifications_outlined,
-        label: 'Notifications',
+        label: 'Мэдээлэл',
         key: 'notifications',
       ),
-      _ActionItem(icon: Icons.map_outlined, label: 'Navigate', key: 'navigate'),
     ];
 
     return Column(
@@ -39,17 +38,25 @@ class HomeActions extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 2.2,
-          children: actions
-              .map((a) => _ActionCard(item: a, onTap: () => onAction(a.key)))
-              .toList(),
+        Row(
+          children: [
+            Expanded(
+              child: _ActionCard(
+                item: actions[0],
+                onTap: () => onAction(actions[0].key),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ActionCard(
+                item: actions[1],
+                onTap: () => onAction(actions[1].key),
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 12),
+        _ActionCard(item: actions[2], onTap: () => onAction(actions[2].key)),
       ],
     );
   }
@@ -85,8 +92,8 @@ class _ActionCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 34,
-              height: 34,
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
                 color: const Color(0xFF7B4FD4).withOpacity(0.15),
                 borderRadius: BorderRadius.circular(10),
