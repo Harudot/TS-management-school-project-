@@ -1,141 +1,74 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+class UserProfile {
+  String name;
+  String email;
+  String phone;
+  String bio;
 
-/// Хэрэглэгчийн мэдээлэл хадгалах model
-class AppUser {
-  final String name;
-  final String email;
-  final String password;
-  final bool isAdmin;
-
-  const AppUser({
+  UserProfile({
     required this.name,
     required this.email,
-    required this.password,
-    this.isAdmin = false,
+    this.phone = '',
+    this.bio = '',
   });
-
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'email': email,
-    'password': password,
-    'isAdmin': isAdmin,
-  };
-
-  factory AppUser.fromJson(Map<String, dynamic> j) => AppUser(
-    name: j['name'],
-    email: j['email'],
-    password: j['password'],
-    isAdmin: j['isAdmin'] ?? false,
-  );
 }
 
-/// Нэвтрэх / бүртгэх үйлчилгээ
-///
-/// Admin account статикаар тодорхойлогдсон:
-///   email:    admin@oxalis.edu
-///   password: Admin@1234
 class AuthService {
-  static const _usersKey = 'oxalis_users';
-  static const _loggedInKey = 'oxalis_logged_in_email';
+  static UserProfile? currentUser;
 
-  // ── Static admin ──────────────────────────────
-  static const AppUser _adminUser = AppUser(
-    name: 'Admin',
-    email: 'admin@oxalis.edu',
-    password: 'Admin@1234',
-    isAdmin: true,
-  );
+  static Future<UserProfile?> login({
+    required String email,
+    required String password,
+  }) async {
+    if (email.trim().isEmpty || password.isEmpty) return null;
 
-  // ── Бүх хэрэглэгч унших ──────────────────────
-  static Future<List<AppUser>> _loadUsers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(_usersKey) ?? [];
-    return raw.map((s) => AppUser.fromJson(jsonDecode(s))).toList();
-  }
+    await Future.delayed(const Duration(milliseconds: 800));
 
-  // ── Хэрэглэгч хадгалах ───────────────────────
-  static Future<void> _saveUsers(List<AppUser> users) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-      _usersKey,
-      users.map((u) => jsonEncode(u.toJson())).toList(),
+    currentUser = UserProfile(
+      name: 'John Doe',
+      email: email.trim(),
+      phone: '+976 9999-1234',
+      bio: 'Computer Science student at Oxalis University.',
     );
+
+    return currentUser;
   }
 
-  // ── Бүртгэл үүсгэх ───────────────────────────
-  /// null → амжилттай, String → алдааны мессеж
   static Future<String?> signUp({
     required String name,
     required String email,
     required String password,
     required String confirmPassword,
   }) async {
-    if (name.trim().isEmpty) return 'Нэрээ оруулна уу';
-    if (!email.contains('@')) return 'И-мэйл буруу байна';
-    if (password.length < 6) return 'Нууц үг хамгийн багадаа 6 тэмдэгт';
-    if (password != confirmPassword) return 'Нууц үг таарахгүй байна';
+    if (name.trim().isEmpty) return 'Name is required';
+    if (email.trim().isEmpty) return 'Email is required';
+    if (password.length < 6) return 'Password must be at least 6 characters';
+    if (password != confirmPassword) return 'Passwords do not match';
 
-    if (email.trim().toLowerCase() == _adminUser.email.toLowerCase()) {
-      return 'Энэ и-мэйл аль хэдийн бүртгэлтэй байна';
-    }
+    await Future.delayed(const Duration(milliseconds: 800));
 
-    final users = await _loadUsers();
-    final exists = users.any(
-      (u) => u.email.toLowerCase() == email.trim().toLowerCase(),
-    );
-    if (exists) return 'Энэ и-мэйл аль хэдийн бүртгэлтэй байна';
+    currentUser = UserProfile(name: name.trim(), email: email.trim());
 
-    users.add(
-      AppUser(
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        password: password,
-      ),
-    );
-    await _saveUsers(users);
     return null;
   }
 
-  // ── Нэвтрэх ──────────────────────────────────
-  /// AppUser → амжилттай, null → буруу мэдээлэл
-  static Future<AppUser?> login({
+  static Future<void> updateProfile({
+    required String name,
     required String email,
-    required String password,
+    required String phone,
+    required String bio,
   }) async {
-    final e = email.trim().toLowerCase();
-    final p = password.trim();
+    await Future.delayed(const Duration(milliseconds: 400));
 
-    if (e == _adminUser.email.toLowerCase() && p == _adminUser.password) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_loggedInKey, e);
-      return _adminUser;
-    }
+    currentUser ??= UserProfile(name: name, email: email);
 
-    final users = await _loadUsers();
-    final user = users
-        .where((u) => u.email == e && u.password == p)
-        .firstOrNull;
-    if (user != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_loggedInKey, e);
-    }
-    return user;
+    currentUser!.name = name;
+    currentUser!.email = email;
+    currentUser!.phone = phone;
+    currentUser!.bio = bio;
   }
 
-  // ── Гарах ────────────────────────────────────
-  static Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_loggedInKey);
-  }
-
-  // ── Одоогийн нэвтэрсэн хэрэглэгч ────────────
-  static Future<AppUser?> currentUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString(_loggedInKey);
-    if (email == null) return null;
-    if (email == _adminUser.email.toLowerCase()) return _adminUser;
-    final users = await _loadUsers();
-    return users.where((u) => u.email == email).firstOrNull;
+  static Future<void> signOut() async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    currentUser = null;
   }
 }
