@@ -163,3 +163,7 @@ git push origin feature-your-branch
 ## 📜 License
 
 This project is for educational purposes.
+
+## shortest path find algo
+Dijkstra’s Algorithm
+Bellman–Ford Algorithm
