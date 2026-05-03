@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:ts_management/screens/login_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
-  runApp(const OxalisApp(subtitle: 'Student'));
+import 'package:ts_management/core/firebase/firebase_init.dart';
+import 'package:ts_management/core/router/app_router.dart';
+import 'package:ts_management/core/theme/app_theme.dart';
+import 'package:ts_management/core/theme/theme_controller.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initFirebase();
+  runApp(const ProviderScope(child: SmartCampusApp()));
 }
 
-class OxalisApp extends StatelessWidget {
-  final String subtitle;
-
-  const OxalisApp({super.key, required this.subtitle});
+class SmartCampusApp extends ConsumerWidget {
+  const SmartCampusApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Oxalis Hub',
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeControllerProvider);
+    return MaterialApp.router(
+      title: 'Smart Campus',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'SF Pro Display',
-        scaffoldBackgroundColor: const Color(0xFF1A0A2E),
-      ),
-      home: const LoginScreen(),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: themeMode,
+      routerConfig: router,
     );
   }
 }
