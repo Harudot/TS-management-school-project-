@@ -45,3 +45,6 @@ app.*.map.json
 /android/app/release
 
 /service-account.json
+
+# Node.js dependencies for local admin scripts
+scripts/node_modules/

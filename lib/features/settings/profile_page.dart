@@ -10,6 +10,7 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider).asData?.value;
+    final isAdmin = ref.watch(isAdminProvider).asData?.value ?? false;
     final scheme = Theme.of(context).colorScheme;
     return SafeArea(
       child: ListView(
@@ -54,6 +55,15 @@ class ProfilePage extends ConsumerWidget {
                   title: const Text('Followed buildings'),
                   subtitle: Text('${user?.followedBuildings.length ?? 0} buildings'),
                 ),
+                if (isAdmin)
+                  ListTile(
+                    leading: Icon(Icons.admin_panel_settings_rounded,
+                        color: scheme.primary),
+                    title: const Text('Admin Dashboard'),
+                    subtitle: const Text('Manage buildings, events, users'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => context.go('/admin/overview'),
+                  ),
                 ListTile(
                   leading: const Icon(Icons.settings_outlined),
                   title: const Text('Settings'),

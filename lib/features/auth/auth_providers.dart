@@ -10,6 +10,18 @@ final firebaseAuthProvider = Provider<FirebaseAuth>((_) => FirebaseAuth.instance
 final authStateProvider = StreamProvider<User?>(
     (ref) => ref.watch(firebaseAuthProvider).authStateChanges());
 
+final isAdminProvider = StreamProvider<bool>((ref) async* {
+  final auth = ref.watch(firebaseAuthProvider);
+  await for (final user in auth.idTokenChanges()) {
+    if (user == null) {
+      yield false;
+    } else {
+      final token = await user.getIdTokenResult();
+      yield token.claims?['role'] == 'admin';
+    }
+  }
+});
+
 final currentUserProvider = StreamProvider<AppUser?>((ref) async* {
   final auth = ref.watch(firebaseAuthProvider);
   final repo = ref.watch(usersRepositoryProvider);

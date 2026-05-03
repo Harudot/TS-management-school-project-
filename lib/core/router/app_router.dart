@@ -5,6 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:ts_management/admin/pages/admin_buildings_page.dart';
+import 'package:ts_management/admin/pages/admin_events_page.dart';
+import 'package:ts_management/admin/pages/admin_floors_page.dart';
+import 'package:ts_management/admin/pages/admin_nav_editor_page.dart';
+import 'package:ts_management/admin/pages/admin_overview_page.dart';
+import 'package:ts_management/admin/pages/admin_people_page.dart';
+import 'package:ts_management/admin/pages/admin_rooms_page.dart';
+import 'package:ts_management/admin/pages/admin_shell.dart';
+import 'package:ts_management/admin/pages/admin_start_points_page.dart';
+import 'package:ts_management/admin/pages/admin_users_page.dart';
 import 'package:ts_management/features/auth/auth_providers.dart';
 import 'package:ts_management/features/auth/login_page.dart';
 import 'package:ts_management/features/auth/signup_page.dart';
@@ -24,7 +34,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/login',
     refreshListenable: GoRouterRefreshStream(authStream),
-    redirect: (context, state) {
+    redirect: (context, state) async {
       final user = FirebaseAuth.instance.currentUser;
       final loggedIn = user != null;
       final loggingIn = state.matchedLocation == '/login' ||
@@ -32,6 +42,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           state.matchedLocation == '/forgot';
       if (!loggedIn && !loggingIn) return '/login';
       if (loggedIn && loggingIn) return '/home';
+      if (state.matchedLocation.startsWith('/admin')) {
+        final token = await user!.getIdTokenResult();
+        if (token.claims?['role'] != 'admin') return '/home';
+      }
       return null;
     },
     routes: [
@@ -66,6 +80,47 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(path: '/settings', builder: (_, __) => const SettingsPage()),
+      GoRoute(path: '/admin', redirect: (_, __) => '/admin/overview'),
+      ShellRoute(
+        builder: (_, __, child) => AdminShell(child: child),
+        routes: [
+          GoRoute(
+              path: '/admin/overview',
+              builder: (_, __) => const AdminOverviewPage()),
+          GoRoute(
+              path: '/admin/buildings',
+              builder: (_, __) => const AdminBuildingsPage()),
+          GoRoute(
+            path: '/admin/buildings/:id/floors',
+            builder: (_, s) =>
+                AdminFloorsPage(buildingId: s.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: '/admin/buildings/:id/rooms',
+            builder: (_, s) =>
+                AdminRoomsPage(buildingId: s.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: '/admin/buildings/:id/nav',
+            builder: (_, s) =>
+                AdminNavEditorPage(buildingId: s.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: '/admin/buildings/:id/start-points',
+            builder: (_, s) =>
+                AdminStartPointsPage(buildingId: s.pathParameters['id']!),
+          ),
+          GoRoute(
+              path: '/admin/people',
+              builder: (_, __) => const AdminPeoplePage()),
+          GoRoute(
+              path: '/admin/events',
+              builder: (_, __) => const AdminEventsPage()),
+          GoRoute(
+              path: '/admin/users',
+              builder: (_, __) => const AdminUsersPage()),
+        ],
+      ),
     ],
   );
 });
