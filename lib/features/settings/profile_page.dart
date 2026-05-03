@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -80,7 +81,56 @@ class ProfilePage extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 16),
+          const _AuthDebugCard(),
         ],
+      ),
+    );
+  }
+}
+
+class _AuthDebugCard extends ConsumerStatefulWidget {
+  const _AuthDebugCard();
+  @override
+  ConsumerState<_AuthDebugCard> createState() => _AuthDebugCardState();
+}
+
+class _AuthDebugCardState extends ConsumerState<_AuthDebugCard> {
+  String _output = 'Tap "Refresh token" to inspect.';
+
+  Future<void> _refresh() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      setState(() => _output = 'Not signed in.');
+      return;
+    }
+    final token = await user.getIdTokenResult(true);
+    setState(() => _output = 'UID:    ${user.uid}\n'
+        'Email:  ${user.email}\n'
+        'Provider: ${user.providerData.map((p) => p.providerId).join(", ")}\n'
+        'Claims: ${token.claims}');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('DEBUG: Auth state',
+                style: TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            Text(_output, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+            const SizedBox(height: 12),
+            FilledButton.tonalIcon(
+              onPressed: _refresh,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Refresh token'),
+            ),
+          ],
+        ),
       ),
     );
   }
