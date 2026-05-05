@@ -9,6 +9,7 @@ import 'package:ts_management/data/models/event.dart';
 import 'package:ts_management/data/models/room.dart';
 import 'package:ts_management/data/repositories/repositories.dart';
 import 'package:ts_management/features/auth/auth_providers.dart';
+import 'package:ts_management/features/navigation/start_point_picker.dart';
 
 class BuildingInfoPage extends ConsumerWidget {
   const BuildingInfoPage({super.key, required this.buildingId});
@@ -146,42 +147,71 @@ class _SectionTitle extends StatelessWidget {
           fontWeight: FontWeight.w700));
 }
 
-class _EventTile extends StatelessWidget {
+class _EventTile extends ConsumerWidget {
   const _EventTile({required this.event});
   final CampusEvent event;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final fmt = DateFormat('h:mm a');
     final scheme = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHigh,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: () => _navigateToEvent(context, ref),
         borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.event_rounded, color: scheme.primary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(event.title,
-                    style: const TextStyle(fontWeight: FontWeight.w700)),
-                const SizedBox(height: 2),
-                Text(
-                  'F${event.floor} · ${fmt.format(event.startTime)}–${fmt.format(event.endTime)}',
-                  style: TextStyle(
-                      color: scheme.onSurfaceVariant, fontSize: 12),
-                ),
-              ],
-            ),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(16),
           ),
-        ],
+          child: Row(
+            children: [
+              Icon(Icons.event_rounded, color: scheme.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(event.title,
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 2),
+                    Text(
+                      'F${event.floor} · ${fmt.format(event.startTime)}–${fmt.format(event.endTime)}',
+                      style: TextStyle(
+                          color: scheme.onSurfaceVariant, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.navigation_rounded,
+                  size: 18, color: scheme.onSurfaceVariant),
+            ],
+          ),
+        ),
       ),
     );
+  }
+
+  Future<void> _navigateToEvent(BuildContext context, WidgetRef ref) async {
+    if (event.roomId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No room set for this event')),
+      );
+      return;
+    }
+    final rooms =
+        await ref.read(buildingsRepositoryProvider).rooms(event.buildingId);
+    final room = rooms.where((r) => r.id == event.roomId).firstOrNull;
+    if (!context.mounted) return;
+    if (room == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Room ${event.roomId} not found')),
+      );
+      return;
+    }
+    _startNavigation(
+        context, event.buildingId, room.waypointId, event.title);
   }
 }
 
@@ -211,7 +241,8 @@ class _FloorTile extends StatelessWidget {
                   leading: const Icon(Icons.meeting_room_outlined),
                   title: Text('${r.number} · ${r.name}'),
                   trailing: const Icon(Icons.navigation_rounded, size: 18),
-                  onTap: () {},
+                  onTap: () => _startNavigation(
+                      context, buildingId, r.waypointId, '${r.number} · ${r.name}'),
                 ))
             .toList(),
       ),
@@ -239,6 +270,19 @@ class _Fallback extends StatelessWidget {
       ],
     );
   }
+}
+
+void _startNavigation(
+    BuildContext context, String buildingId, String endWaypoint, String label) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (_) => StartPointPicker(
+      buildingId: buildingId,
+      endWaypointId: endWaypoint,
+      destinationLabel: label,
+    ),
+  );
 }
 
 class _Empty extends StatelessWidget {

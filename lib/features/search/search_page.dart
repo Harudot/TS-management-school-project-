@@ -157,26 +157,36 @@ class _PeopleTab extends ConsumerWidget {
                 ),
                 title: Text(p.name),
                 subtitle: Text('${p.role} · ${p.department}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.navigation_rounded),
-                  onPressed: () async {
-                    if (p.roomId == null) return;
-                    final room = await ref
-                        .read(buildingsRepositoryProvider)
-                        .rooms(p.buildingId)
-                        .then((rs) => rs.firstWhere((r) => r.id == p.roomId));
-                    if (context.mounted) {
-                      _startNavigation(context, p.buildingId, room.waypointId,
-                          '${p.name}\'s office');
-                    }
-                  },
-                ),
+                trailing: const Icon(Icons.navigation_rounded),
+                onTap: () => _navigateToPerson(context, ref, p),
               ),
             );
           },
         );
       },
     );
+  }
+
+  Future<void> _navigateToPerson(
+      BuildContext context, WidgetRef ref, Person p) async {
+    if (p.roomId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No office set for ${p.name}')),
+      );
+      return;
+    }
+    final rooms =
+        await ref.read(buildingsRepositoryProvider).rooms(p.buildingId);
+    final room = rooms.where((r) => r.id == p.roomId).firstOrNull;
+    if (!context.mounted) return;
+    if (room == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("${p.name}'s office (${p.roomId}) not found")),
+      );
+      return;
+    }
+    _startNavigation(
+        context, p.buildingId, room.waypointId, "${p.name}'s office");
   }
 }
 

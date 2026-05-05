@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:ts_management/data/models/building.dart';
+import 'package:ts_management/data/models/room.dart';
+import 'package:ts_management/data/models/waypoint.dart';
 import 'package:ts_management/data/repositories/repositories.dart';
 import 'package:ts_management/domain/services/routing_service.dart';
 import 'package:ts_management/features/navigation/floor_painter.dart';
@@ -29,6 +31,8 @@ class NavigationPage extends ConsumerStatefulWidget {
 class _NavigationPageState extends ConsumerState<NavigationPage> {
   ComputedRoute? _route;
   List<FloorDoc> _floors = const [];
+  NavigationGraph? _graph;
+  List<RoomDoc> _rooms = const [];
   int _segmentIndex = 0;
   int _stepIndex = 0;
   bool _arrived = false;
@@ -52,10 +56,13 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
       final route = RoutingService()
           .findRoute(graph, widget.startWaypointId, widget.endWaypointId);
       final floors = await buildingsRepo.watchFloors(widget.buildingId).first;
+      final rooms = await buildingsRepo.rooms(widget.buildingId);
       if (!mounted) return;
       setState(() {
         _route = route;
         _floors = floors;
+        _graph = graph;
+        _rooms = rooms;
         if (route.isEmpty) _error = 'No route found';
       });
     } catch (e) {
@@ -146,6 +153,15 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     final segments = _route!.segments;
     final segment = _segment!;
     final floorDoc = _currentFloor!;
+    final floorNodes =
+        _graph!.nodes.where((n) => n.floor == segment.floor).toList();
+    final floorNodeIds = floorNodes.map((n) => n.id).toSet();
+    final floorEdges = _graph!.edges
+        .where((e) =>
+            floorNodeIds.contains(e.from) && floorNodeIds.contains(e.to))
+        .toList();
+    final floorRooms =
+        _rooms.where((r) => r.floor == segment.floor).toList();
 
     final progress = _arrived
         ? 1.0
@@ -209,13 +225,16 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
                       else
                         Container(color: scheme.surfaceContainerHigh),
                       CustomPaint(
-                        painter: FloorOverlayPainter(
+                        painter: FloorPlanPainter(
                           routeNodes: segment.nodes,
-                          allNodes: segment.nodes,
+                          allNodes: floorNodes,
+                          allEdges: floorEdges,
+                          rooms: floorRooms,
                           viewWidth: floorDoc.width,
                           viewHeight: floorDoc.height,
                           activeIndex: _stepIndex + 1,
-                          color: scheme.primary,
+                          routeColor: scheme.primary,
+                          scheme: scheme,
                         ),
                       ),
                     ],
