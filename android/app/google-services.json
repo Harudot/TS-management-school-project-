@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "799135902364",
+    "project_id": "smart-campus-app-5d7de",
+    "storage_bucket": "smart-campus-app-5d7de.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:799135902364:android:7b93ade6e3967e05359b59",
+        "android_client_info": {
+          "package_name": "com.example.ts_management"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "799135902364-kridgfeovtnp7dsophe0jdo3a74a7nk9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3O8cH8AkjIjjwWsrFqhWg7nPDmXkinak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "799135902364-kridgfeovtnp7dsophe0jdo3a74a7nk9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "799135902364-59fgmdbvt22j0mramo3u09v9ghmnafv6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.tsManagement"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
