@@ -21,7 +21,7 @@ class AdminUsersPage extends ConsumerWidget {
                   fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           Text(
-              'Note: promoting users to admin requires the Cloud Function `setAdminClaim`. This page also flips the role field in Firestore.',
+              'Read-only. To promote a user to admin, run `node scripts/grant-admin.js <email>` from the project root.',
               style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant)),
           const SizedBox(height: 16),
@@ -29,6 +29,18 @@ class AdminUsersPage extends ConsumerWidget {
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: db.collection('users').snapshots(),
               builder: (context, snap) {
+                if (snap.hasError) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text('Failed to load users: ${snap.error}',
+                          style: const TextStyle(color: Colors.red)),
+                    ),
+                  );
+                }
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
                 final docs = snap.data?.docs ?? const [];
                 if (docs.isEmpty) return const Center(child: Text('No users'));
                 return ListView(
@@ -47,21 +59,12 @@ class AdminUsersPage extends ConsumerWidget {
                         ),
                         title: Text(u.name.isEmpty ? u.email : u.name),
                         subtitle: Text('${u.email} · role=${u.role}'),
-                        trailing: u.role == 'admin'
-                            ? OutlinedButton(
-                                onPressed: () => db
-                                    .collection('users')
-                                    .doc(u.uid)
-                                    .update({'role': 'user'}),
-                                child: const Text('Demote'),
-                              )
-                            : FilledButton(
-                                onPressed: () => db
-                                    .collection('users')
-                                    .doc(u.uid)
-                                    .update({'role': 'admin'}),
-                                child: const Text('Promote'),
-                              ),
+                        trailing: Chip(
+                          label: Text(u.role),
+                          backgroundColor: u.role == 'admin'
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : null,
+                        ),
                       ),
                     );
                   }).toList(),

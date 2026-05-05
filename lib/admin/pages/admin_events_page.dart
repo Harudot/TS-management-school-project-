@@ -33,6 +33,18 @@ class AdminEventsPage extends ConsumerWidget {
             child: StreamBuilder<List<CampusEvent>>(
               stream: repo.watchAll(),
               builder: (context, snap) {
+                if (snap.hasError) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text('Failed to load events: ${snap.error}',
+                          style: const TextStyle(color: Colors.red)),
+                    ),
+                  );
+                }
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
                 final list = snap.data ?? const <CampusEvent>[];
                 if (list.isEmpty) return const Center(child: Text('No events'));
                 return ListView(

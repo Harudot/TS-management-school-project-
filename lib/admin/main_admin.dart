@@ -29,11 +29,11 @@ final adminRouterProvider = Provider<GoRouter>((ref) {
     redirect: (_, state) async {
       final user = FirebaseAuth.instance.currentUser;
       final loggingIn = state.matchedLocation == '/admin/login';
-      if (user == null && !loggingIn) return '/admin/login';
-      if (user != null && loggingIn) {
-        final token = await user.getIdTokenResult();
-        if (token.claims?['role'] == 'admin') return '/admin/overview';
-      }
+      if (user == null) return loggingIn ? null : '/admin/login';
+      final token = await user.getIdTokenResult();
+      final isAdmin = token.claims?['role'] == 'admin';
+      if (!isAdmin) return loggingIn ? null : '/admin/login';
+      if (loggingIn) return '/admin/overview';
       return null;
     },
     routes: [
