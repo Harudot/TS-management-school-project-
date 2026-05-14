@@ -1,0 +1,189 @@
+  # Smart Campus App — Redesign + Indoor Wayfinding + Admin CRUD
+
+  ## Project
+  Flutter app at `C:/projects/flutter/ts_management`. Uses **Riverpod**, **go_router**, **Firebase (Auth + Firestore +
+  Messaging)**. Existing structure:
+  - `lib/data/models/` — Building, RoomDoc, Person, CampusEvent, Waypoint
+  - `lib/features/` — auth, dashboard (home), navigation (map_page, navigation_page, floor_painter), search, scan,
+  settings, building
+  - `lib/admin/pages/` — overview, buildings, floors, rooms, people, events, users, nav_editor, start_points
+  - `lib/core/theme/app_theme.dart` — central theme to update
+
+  Do **not** add new top-level dependencies unless required. Stay on **Firebase Spark (free) plan** — no Cloud
+  Functions.
+
+  ---
+
+  ## Goal 1 — Redesign Home and Profile to match the mockups
+
+  Mockup files (read them first):
+  - `C:/Users/batba/Downloads/building_navigator_home_v3_with_events.html` → rebuild
+  `lib/features/dashboard/home_page.dart`
+  - `C:/Users/batba/Downloads/building_navigator_profile_v2.html` → rebuild `lib/features/settings/profile_page.dart`
+
+  ### Design tokens (apply in `app_theme.dart` as a dark-first ColorScheme)
+  - Background `#0b0b0f`, surface `#1a1a22`, surface-variant `#2a2a35`
+  - Primary (accent) `#a78bfa` (lavender), on-primary `#0b0b0f`
+  - Tertiary / "live" `#ec4899` (pink), success `#34d399`, warning `#fbbf24`, danger `#f87171`
+  - Text primary `#ffffff`, secondary `#8a8a93`, muted `#6b6b75`
+  - Card radius **14px**, hero radius **18px**, phone-shell radius **28px**
+  - Font: keep current sans, weights 400/500/700
+
+  ### Home screen sections (top → bottom)
+  1. **Greeting row** — "Hello" / user name + bell with unread dot + circular avatar with initial
+  2. **Search bar** — `#1a1a22` pill, "Search building, place or event", trailing QR/scan icon → `/scan`
+  3. **"You're inside" hero card** — purple gradient `linear-gradient(135deg, #2d1b69, #4c1d95)`. Shows current
+  building, "North wing · near elevator B", floor chip "Floor 2 of 6". 4 quick chips: Restroom / Elevator / Exit / Café
+  (tap → highlights nearest of that type on the map)
+  4. **"Happening here"** — events at the user's current building. Live event has pink left-border + pink "LIVE" pill +
+  a thin progress bar showing how much of the event is elapsed. Non-live shows "in 4h" chip.
+  5. **"Followed buildings"** — 2-column grid of cards with small gradient header, optional "2 live" / "Sale" / "Expo"
+  badge top-left, floor count "6F" badge top-right, name + type · distance below
+  6. **"Coming up at your buildings"** — list rows with date tile (e.g. SAT 12) + title + venue + chevron
+  7. **Bottom nav** — 5 slots: Home / Search / **center QR FAB** (purple circle) / Map / Profile. Active item gets a
+  `#2a1e3a` rounded chip behind the icon and lavender label.
+
+  ### Profile screen sections
+  1. Header "Profile" + edit pencil icon
+  2. Avatar (60px lavender circle with initial) + name + email
+  3. Stat strip: Following / Saved places / Visits per month — three columns separated by hairline dividers
+  4. **Followed buildings** list — small gradient icon tile + name + "N floors · Type" + status pill ("Inside" green) or
+   distance
+  5. **Settings** group card: Notifications (On), Language (English), Appearance (Dark), Accessibility, Privacy, Help &
+  feedback — each with a colored leading icon and chevron
+  6. **Sign out** row in red
+  7. Version label centered
+  8. Same bottom nav with Profile active
+
+  ### Implementation rules
+  - Use **`Theme.of(context).colorScheme`** everywhere; do not hard-code hex except in the central theme.
+  - Build reusable widgets in `lib/core/widgets/`: `BottomNavBar`, `LiveEventCard`, `BuildingTile`, `StatTriple`,
+  `SettingsTile`, `SectionHeader`.
+  - Keep all existing routes and providers; only swap the UI.
+  - Inactive bottom-nav icons must remain tappable — wire them to `/`, `/search`, `/scan` (FAB), `/map`, `/profile`.
+
+  ---
+
+  ## Goal 2 — Indoor wayfinding that users actually understand
+
+  **Building data: "Сүлжээ Хичээлийн I байр" (4 floors).** Source the room list from `C:\Users\batba\Downloads\Сүлжээ
+  Хичээлийн I байр ХБ.pdf`. Seed Firestore with this data via `scripts/seed_building.dart`:
+
+  - **Floor B1 (0 давхар)** — 001 Виртуал лаб, 002 ХАБЭА лаб, 003 Хичээлийн танхим, 004 Мужааны өрөө, 005 Багш нарын
+  өрөө, 006 Склад-1, 007 Ажилчдын өрөө, 008 Склад-2, 009 Дадлагын газар, 010 Металл судлалын лаб, 011 Токарын лаб, 012
+  Авто оношилгоо засварын газар, 013 Багш нарын өрөө, 014 Хичээлийн танхим, 015 Симуляторын лаб, 016 Багш нарын өрөө,
+  017 ШИТ-ны өрөө, 018 Ажилчдын өрөө, 019 Багш нарын өрөө, 020 Цахилгаан лаб-1, 021 Цахилгаан лаб-2, 022
+  Гидрометаллургийн лаб, 023 Хими/Гидравлик/Баяжуулалтын лаб, 024 Мэргэжлийн сургалтын склад
+  - **Floor 1** — 101–104 Хичээлийн танхим, 105–107 Албан өрөө, 108–109 Багш нарын өрөө, 110–114 Албан/Багш нарын өрөө +
+   1 Уншлагын танхим, 2 Номын фонд, 3 Номын фонд-1, 4 Номын сангийн эрхлэгч, 5 Vip өрөө, 6 Гал тогоо, 7 Бэлтгэлийн өрөө,
+   8 Угаалгын өрөө, 9 Албан өрөө, 10 Склад, 11 Хоолны зал, 12 Албан өрөө, 13 Коридор, 14 ШИТ-ний танхим, 15/16 00 өрөө,
+  17 Электрон номын сан, 18 Мэдээлэлийн төв, 19 Коридор, 20 Серверийн өрөө, 21 Агааржуулалтын өрөө, 22 00 өрөө, 23
+  Коридор
+  - **Floor 2** — 201 Фонд, 202 Ком лаб, 203/204 Багш нарын өрөө, 205 Албан өрөө, 206 Эрдмийн зөвлөлийн өрөө, 207
+  Захирлын өрөө + нарийн бичиг, 208 Албан өрөө, 209 Сургалт эрхэлсэн дэд захирал, 210/211 Албан өрөө, 212/213 Багш нарын
+   өрөө + 1 Лекцийн зал, 2 Албан өрөө, 3 Багш нарын өрөө, 4/5 Албан өрөө, 6 Бялдаржуулах өрөө, 7 Спорт зал, 8 Коридор, 9
+   Хувцас солих өрөө, 10 ДУШ, 11 Багшийн өрөө, 12 Хувцасны склад, 13 Коридор, 14 Хүндэтгэлийн танхим, 15 Галерей
+  - **Floor 3** — 301 Архив, 302–305 Хичээлийн танхим, 306 Ком лаб, 306-А Ком лаб, 306-Б Багш нарын өрөө, 307 Багш нарын
+   өрөө, 308 Агаажуулалтын өрөө, 309–311 Багш нарын өрөө, 312 Агаажуулалтын өрөө, 313 Багш нарын өрөө
+
+  (The PDF also marks compass orientation **З-west / У-east / Б-south / ТА-ЭНД-north** and shows network gear — ignore
+  the gear, but preserve the compass for the map header.)
+
+  ### Map UX requirements (rebuild `lib/features/navigation/`)
+  1. **Floor selector** — vertical pill stack on the right edge: `3 / 2 / 1 / B1`. Active pill is lavender, inactive
+  `#1a1a22`. Tapping switches the SVG/PNG layer instantly.
+  2. **Floor plan rendering** — extract one PNG per floor from the PDF into `assets/floorplans/floor_{b1,1,2,3}.png`,
+  declare in `pubspec.yaml`. Render with `InteractiveViewer` (pinch + pan, min 0.5x, max 4x). Overlay rooms as tappable
+  polygons via `CustomPainter` (`floor_painter.dart` already exists — extend it).
+  3. **Room tap → bottom sheet** showing: room number + name (Mongolian) + type icon + occupants (multiple) + "Find
+  route here" button.
+  4. **Routing**:
+     - User picks **start point** by either: (a) scanning a QR poster placed at known waypoints (already wired via
+  `mobile_scanner` + `start_points` admin page), or (b) tapping "I'm at room X" picker (`start_point_picker.dart`).
+     - Compute path with `routing_service.dart` (BFS over `waypoints` graph stored in Firestore). Render the path as a
+  **thick lavender polyline with a soft pink glow** on the active floor. Animate a moving dot along it.
+     - If start and destination are on different floors, split the path at the stair/elevator waypoint and show **"Take
+  stairs near 106 → Floor 3"** as an inline step card. Floor selector auto-advances when the user taps "Next floor".
+  5. **Step list (collapsible bottom panel)** — plain-language steps in Mongolian + English, e.g. "Урагш 15м яв →
+  коридор 13-аар баруун тийш эргэ → 305 тоот зүүн талд". Generate from waypoint sequence + cardinal directions using the
+   compass (З/У/Б/ТА).
+  6. **Destination marker** — pulsing lavender pin; non-destination rooms dimmed to 40% opacity so the path stands out.
+  7. **Compass + "you are here"** — small compass widget top-left mirroring the PDF orientation; blue dot for current
+  waypoint.
+  8. **Search** — `/search` autocompletes by room number (101, 305...) AND by Mongolian name AND by occupant name;
+  tapping a result deep-links to the map with route preview.
+  9. **Quick chips on the home hero** (Restroom/Elevator/Exit/Café) — open the map and auto-route to the nearest tagged
+  waypoint.
+
+  ---
+
+  ## Goal 3 — Admin: manage events + room occupants (multiple workers per room)
+
+  ### Schema change — IMPORTANT
+  Current `RoomDoc.occupantId` is a **single** string. Switch to a list to support "add/remove worker in room 305" with
+  multiple staff:
+
+  ```dart
+  // lib/data/models/room.dart
+  final List<String> occupantIds; // was: String? occupantId
+  ```
+
+  Migrate existing docs in `scripts/migrate_room_occupants.dart`: `occupantIds = occupantId != null ? [occupantId] :
+  []`. Keep reading legacy `occupantId` once, write new shape.
+
+  `Person.roomId` stays as the canonical home room (a person lives in one primary room) — but a room can host many
+  people. Reverse lookup is via `where('roomId', isEqualTo: roomId)` plus the room's `occupantIds` list (denormalized
+  for fast room-detail reads). When admin adds/removes a worker, write **both** sides in a Firestore batch.
+
+  ### Admin: Room detail page (`lib/admin/pages/admin_rooms_page.dart` → add detail route)
+  - Room header: number, floor, type, Mongolian name (editable)
+  - **Occupants section**:
+    - List of current occupants with photo + name + role + remove button
+    - "Add worker" → searchable picker over `people` collection, filtered by buildingId, excluding current occupants
+    - Removing detaches both sides (room.occupantIds and person.roomId if it equals this room)
+  - Save uses `WriteBatch` so room + person stay in sync.
+
+  ### Admin: Events (`lib/admin/pages/admin_events_page.dart`)
+  Full CRUD already partially exists — make sure it covers:
+  - Create / edit / delete `CampusEvent`
+  - Fields: title, description, building, floor, room (optional), start, end, category (career-fair / pitch / lecture /
+  workshop / general)
+  - "Pin to home" toggle → sets `featured: true`; home "Happening here" reads featured + active first.
+  - On create, send an FCM topic message to `building_{buildingId}` so followers get notified. Admin app subscribes
+  nothing; client app subscribes to topics for buildings the user follows.
+
+  ### Security rules (`firebase/firestore.rules`)
+  - `buildings`, `floors`, `rooms`, `people`, `events` — public read
+  - Writes only if `request.auth.token.admin == true` (set the custom claim manually via Firebase Admin SDK once; or
+  simpler: keep an `admins/{uid}` doc and gate writes on
+  `exists(/databases/$(database)/documents/admins/$(request.auth.uid))`)
+  - `users/{uid}` — read/write only by self; admin can read all
+
+  ### Admin role
+  Reuse existing `lib/admin/main_admin.dart` entry. Build admin as Flutter web (`flutter build web -t
+  lib/admin/main_admin.dart`) and deploy to Firebase Hosting. End users get the mobile app; staff get the web admin URL.
+
+  ---
+
+  ## Constraints
+  - **No Cloud Functions** (Blaze required). Client-side writes only, gated by security rules.
+  - Keep existing route paths so deep links don't break.
+  - All new strings in both English and Mongolian — wrap in a simple `lib/core/i18n/strings.dart` map keyed by locale;
+  no extra package.
+  - Preserve nullability and the existing `RoomDoc.fromMap` graceful defaults.
+  - Run `flutter analyze` clean before finishing.
+
+  ## Deliverable order
+  1. Theme + reusable widgets
+  2. Home redesign
+  3. Profile redesign
+  4. Schema migration: room occupants → list (model + repo + migration script)
+  5. Admin room-detail page with add/remove worker
+  6. Admin events CRUD polish + FCM topic notify
+  7. Floor-plan asset extraction + map rebuild (floor selector, InteractiveViewer, room polygons)
+  8. Routing polyline + step list + cross-floor handoff
+  9. Search by room number / name / occupant
+  10. Security rules + seed script + README update
+
+  After each step, run `flutter analyze` and a hot reload smoke test on Android emulator. Report what changed in one
+  sentence before moving on.

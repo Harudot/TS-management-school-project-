@@ -23,11 +23,17 @@ import 'package:ts_management/features/dashboard/dashboard_shell.dart';
 import 'package:ts_management/features/dashboard/home_page.dart';
 import 'package:ts_management/features/search/search_page.dart';
 import 'package:ts_management/features/scan/scan_page.dart';
+import 'package:ts_management/features/navigation/building_map_page.dart';
 import 'package:ts_management/features/navigation/map_page.dart';
 import 'package:ts_management/features/navigation/navigation_page.dart';
 import 'package:ts_management/features/building/building_info_page.dart';
 import 'package:ts_management/features/settings/settings_page.dart';
 import 'package:ts_management/features/settings/profile_page.dart';
+import 'package:ts_management/features/settings/notifications_page.dart';
+import 'package:ts_management/features/settings/language_page.dart';
+import 'package:ts_management/features/settings/accessibility_page.dart';
+import 'package:ts_management/features/settings/privacy_page.dart';
+import 'package:ts_management/features/settings/help_feedback_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authStream = ref.watch(authStateProvider.stream);
@@ -37,7 +43,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) async {
       final user = FirebaseAuth.instance.currentUser;
       final loggedIn = user != null;
-      final loggingIn = state.matchedLocation == '/login' ||
+      final loggingIn =
+          state.matchedLocation == '/login' ||
           state.matchedLocation == '/signup' ||
           state.matchedLocation == '/forgot';
       if (!loggedIn && !loggingIn) return '/login';
@@ -68,6 +75,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             BuildingInfoPage(buildingId: state.pathParameters['id']!),
       ),
       GoRoute(
+        path: '/map/:id',
+        builder: (_, s) => BuildingMapPage(buildingId: s.pathParameters['id']!),
+      ),
+      GoRoute(
         path: '/navigate',
         builder: (_, state) {
           final extra = state.extra as Map<String, dynamic>;
@@ -80,16 +91,38 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(path: '/settings', builder: (_, __) => const SettingsPage()),
+      GoRoute(
+        path: '/settings/notifications',
+        builder: (_, __) => const NotificationsPage(),
+      ),
+      GoRoute(
+        path: '/settings/language',
+        builder: (_, __) => const LanguagePage(),
+      ),
+      GoRoute(
+        path: '/settings/accessibility',
+        builder: (_, __) => const AccessibilityPage(),
+      ),
+      GoRoute(
+        path: '/settings/privacy',
+        builder: (_, __) => const PrivacyPage(),
+      ),
+      GoRoute(
+        path: '/settings/help',
+        builder: (_, __) => const HelpFeedbackPage(),
+      ),
       GoRoute(path: '/admin', redirect: (_, __) => '/admin/overview'),
       ShellRoute(
         builder: (_, __, child) => AdminShell(child: child),
         routes: [
           GoRoute(
-              path: '/admin/overview',
-              builder: (_, __) => const AdminOverviewPage()),
+            path: '/admin/overview',
+            builder: (_, __) => const AdminOverviewPage(),
+          ),
           GoRoute(
-              path: '/admin/buildings',
-              builder: (_, __) => const AdminBuildingsPage()),
+            path: '/admin/buildings',
+            builder: (_, __) => const AdminBuildingsPage(),
+          ),
           GoRoute(
             path: '/admin/buildings/:id/floors',
             builder: (_, s) =>
@@ -111,14 +144,17 @@ final routerProvider = Provider<GoRouter>((ref) {
                 AdminStartPointsPage(buildingId: s.pathParameters['id']!),
           ),
           GoRoute(
-              path: '/admin/people',
-              builder: (_, __) => const AdminPeoplePage()),
+            path: '/admin/people',
+            builder: (_, __) => const AdminPeoplePage(),
+          ),
           GoRoute(
-              path: '/admin/events',
-              builder: (_, __) => const AdminEventsPage()),
+            path: '/admin/events',
+            builder: (_, __) => const AdminEventsPage(),
+          ),
           GoRoute(
-              path: '/admin/users',
-              builder: (_, __) => const AdminUsersPage()),
+            path: '/admin/users',
+            builder: (_, __) => const AdminUsersPage(),
+          ),
         ],
       ),
     ],

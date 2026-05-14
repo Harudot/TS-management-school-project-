@@ -8,6 +8,7 @@ import 'package:ts_management/data/models/building.dart';
 import 'package:ts_management/data/models/event.dart';
 import 'package:ts_management/data/models/room.dart';
 import 'package:ts_management/data/repositories/repositories.dart';
+import 'package:ts_management/domain/services/notifications_service.dart';
 import 'package:ts_management/features/auth/auth_providers.dart';
 import 'package:ts_management/features/navigation/start_point_picker.dart';
 
@@ -59,8 +60,12 @@ class BuildingInfoPage extends ConsumerWidget {
                         final repo = ref.read(usersRepositoryProvider);
                         if (following) {
                           await repo.unfollowBuilding(user.uid, b.id);
+                          await NotificationsService.instance
+                              .unsubscribeFromBuilding(b.id);
                         } else {
                           await repo.followBuilding(user.uid, b.id);
+                          await NotificationsService.instance
+                              .subscribeToBuilding(b.id);
                         }
                       },
                     );

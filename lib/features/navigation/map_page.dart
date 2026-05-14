@@ -46,7 +46,7 @@ class _BuildingCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: InkWell(
-        onTap: () => context.push('/building/${b.id}'),
+        onTap: () => context.push('/map/${b.id}'),
         borderRadius: BorderRadius.circular(20),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),

@@ -160,6 +160,34 @@ git push origin feature-your-branch
 
 ---
 
+## 🛠 Setup notes
+
+### Floor plan assets
+
+Per-floor PNGs for the indoor map live in `assets/floorplans/floor_b1.png`,
+`floor_1.png`, `floor_2.png`, `floor_3.png`. See
+`assets/floorplans/README.md` for how to extract them from the source PDF.
+
+### Firestore seeding
+
+Drop a Firebase service account JSON at the project root as
+`service-account.json`, then run:
+
+```sh
+node scripts/seed-building.js              # creates "Сүлжээ Хичээлийн I байр" + rooms
+node scripts/migrate-room-occupants.js     # migrates legacy occupantId → occupantIds[]
+node scripts/grant-admin.js me@example.com # promotes a user to admin
+```
+
+### Admin web build
+
+```sh
+flutter build web -t lib/admin/main_admin.dart
+```
+
+Deploy the `build/web` output to Firebase Hosting. End users get the mobile
+app; staff use the web admin URL.
+
 ## 📜 License
 
 This project is for educational purposes.

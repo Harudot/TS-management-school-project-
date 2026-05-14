@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:ts_management/core/theme/app_theme.dart';
 import 'package:ts_management/data/models/event.dart';
 import 'package:ts_management/data/models/person.dart';
 import 'package:ts_management/data/models/room.dart';
 import 'package:ts_management/data/repositories/repositories.dart';
 import 'package:ts_management/features/navigation/start_point_picker.dart';
 
-final _allRoomsProvider = FutureProvider<List<RoomDoc>>((ref) async {
+final _allRoomsProvider = FutureProvider<List<({String buildingId, RoomDoc room})>>((ref) async {
   final repo = ref.watch(buildingsRepositoryProvider);
   final buildings = await repo.watchAll().first;
-  final all = <RoomDoc>[];
+  final all = <({String buildingId, RoomDoc room})>[];
   for (final b in buildings) {
-    all.addAll(await repo.rooms(b.id));
+    for (final r in await repo.rooms(b.id)) {
+      all.add((buildingId: b.id, room: r));
+    }
   }
   return all;
 });
@@ -31,13 +34,53 @@ class SearchPage extends ConsumerStatefulWidget {
   ConsumerState<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState extends ConsumerState<SearchPage>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabs = TabController(length: 3, vsync: this);
+class _SearchPageState extends ConsumerState<SearchPage> {
   String _query = '';
 
   @override
   Widget build(BuildContext context) {
+    final rooms = ref.watch(_allRoomsProvider).asData?.value ??
+        const <({String buildingId, RoomDoc room})>[];
+    final people =
+        ref.watch(_allPeopleProvider).asData?.value ?? const <Person>[];
+    final events =
+        ref.watch(_allEventsProvider).asData?.value ?? const <CampusEvent>[];
+    final personById = {for (final p in people) p.id: p};
+
+    final q = _query.toLowerCase();
+    final results = <_SearchResult>[];
+    if (q.isNotEmpty) {
+      for (final entry in rooms) {
+        final r = entry.room;
+        final occupantNames = r.occupantIds
+            .map((id) => personById[id]?.name ?? '')
+            .where((s) => s.isNotEmpty)
+            .toList();
+        final matches = r.number.toLowerCase().contains(q) ||
+            r.name.toLowerCase().contains(q) ||
+            occupantNames.any((n) => n.toLowerCase().contains(q));
+        if (!matches) continue;
+        results.add(_SearchResult.room(
+          buildingId: entry.buildingId,
+          room: r,
+          occupantPreview: occupantNames.take(2).join(', '),
+        ));
+      }
+      for (final p in people) {
+        if (p.name.toLowerCase().contains(q) ||
+            p.role.toLowerCase().contains(q) ||
+            p.department.toLowerCase().contains(q)) {
+          results.add(_SearchResult.person(p));
+        }
+      }
+      for (final e in events) {
+        if (e.title.toLowerCase().contains(q) ||
+            e.description.toLowerCase().contains(q)) {
+          results.add(_SearchResult.event(e));
+        }
+      }
+    }
+
     return SafeArea(
       child: Column(
         children: [
@@ -45,30 +88,37 @@ class _SearchPageState extends ConsumerState<SearchPage>
             padding: const EdgeInsets.all(16),
             child: TextField(
               autofocus: true,
-              onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
+              onChanged: (v) => setState(() => _query = v.trim()),
               decoration: const InputDecoration(
-                hintText: 'Search rooms, people, events…',
+                hintText: 'Room number, name, or person…',
                 prefixIcon: Icon(Icons.search_rounded),
               ),
             ),
           ),
-          TabBar(
-            controller: _tabs,
-            tabs: const [
-              Tab(text: 'Rooms'),
-              Tab(text: 'People'),
-              Tab(text: 'Events'),
-            ],
-          ),
           Expanded(
-            child: TabBarView(
-              controller: _tabs,
-              children: [
-                _RoomsTab(query: _query),
-                _PeopleTab(query: _query),
-                _EventsTab(query: _query),
-              ],
-            ),
+            child: q.isEmpty
+                ? const Center(
+                    child: Text(
+                      'Try "305", "Багш нарын" or a name',
+                      style: TextStyle(color: AppTheme.textSecondary),
+                    ),
+                  )
+                : results.isEmpty
+                    ? const Center(
+                        child: Text('No matches',
+                            style:
+                                TextStyle(color: AppTheme.textSecondary)),
+                      )
+                    : ListView.builder(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: results.length,
+                        itemBuilder: (_, i) => _ResultTile(
+                          result: results[i],
+                          peopleById: personById,
+                          rooms: rooms,
+                        ),
+                      ),
           ),
         ],
       ),
@@ -76,161 +126,117 @@ class _SearchPageState extends ConsumerState<SearchPage>
   }
 }
 
-class _RoomsTab extends ConsumerWidget {
-  const _RoomsTab({required this.query});
-  final String query;
+class _SearchResult {
+  final _Kind kind;
+  final RoomDoc? room;
+  final String? buildingId;
+  final String? occupantPreview;
+  final Person? person;
+  final CampusEvent? event;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final rooms = ref.watch(_allRoomsProvider);
-    return rooms.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
-      data: (list) {
-        final filtered = query.isEmpty
-            ? list
-            : list
-                .where((r) =>
-                    r.number.toLowerCase().contains(query) ||
-                    r.name.toLowerCase().contains(query))
-                .toList();
-        if (filtered.isEmpty) return const _Empty('No rooms');
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: filtered.length,
-          itemBuilder: (_, i) {
-            final r = filtered[i];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                leading: CircleAvatar(
-                    child: Text(r.number,
-                        style: const TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w700))),
-                title: Text(r.name),
-                subtitle: Text('Floor ${r.floor}'),
-                trailing: const Icon(Icons.navigation_rounded),
-                onTap: () => _startNavigation(context, 'main', r.waypointId,
-                    '${r.number} · ${r.name}'),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
+  _SearchResult.room({
+    required RoomDoc this.room,
+    required String this.buildingId,
+    required String this.occupantPreview,
+  })  : kind = _Kind.room,
+        person = null,
+        event = null;
+  _SearchResult.person(Person p)
+      : kind = _Kind.person,
+        person = p,
+        room = null,
+        buildingId = null,
+        occupantPreview = null,
+        event = null;
+  _SearchResult.event(CampusEvent e)
+      : kind = _Kind.event,
+        event = e,
+        person = null,
+        room = null,
+        buildingId = null,
+        occupantPreview = null;
 }
 
-class _PeopleTab extends ConsumerWidget {
-  const _PeopleTab({required this.query});
-  final String query;
+enum _Kind { room, person, event }
+
+class _ResultTile extends ConsumerWidget {
+  const _ResultTile({
+    required this.result,
+    required this.peopleById,
+    required this.rooms,
+  });
+  final _SearchResult result;
+  final Map<String, Person> peopleById;
+  final List<({String buildingId, RoomDoc room})> rooms;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final people = ref.watch(_allPeopleProvider);
-    return people.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
-      data: (list) {
-        final filtered = query.isEmpty
-            ? list
-            : list
-                .where((p) =>
-                    p.name.toLowerCase().contains(query) ||
-                    p.role.toLowerCase().contains(query) ||
-                    p.department.toLowerCase().contains(query))
-                .toList();
-        if (filtered.isEmpty) return const _Empty('No people');
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: filtered.length,
-          itemBuilder: (_, i) {
-            final p = filtered[i];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundImage:
-                      p.photoUrl != null ? NetworkImage(p.photoUrl!) : null,
-                  child: p.photoUrl == null
-                      ? Text(p.name.isNotEmpty ? p.name[0] : '?')
-                      : null,
-                ),
-                title: Text(p.name),
-                subtitle: Text('${p.role} · ${p.department}'),
-                trailing: const Icon(Icons.navigation_rounded),
-                onTap: () => _navigateToPerson(context, ref, p),
-              ),
-            );
-          },
+    switch (result.kind) {
+      case _Kind.room:
+        final r = result.room!;
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: AppTheme.surfaceVariant,
+              child: Text(r.number,
+                  style: const TextStyle(
+                      fontSize: 11, fontWeight: FontWeight.w800)),
+            ),
+            title: Text(r.name,
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+            subtitle: Text(
+                'Floor ${r.floor}${result.occupantPreview!.isEmpty ? '' : ' · ${result.occupantPreview}'}'),
+            trailing: const Icon(Icons.navigation_rounded),
+            onTap: () => _startNavigation(
+                context, result.buildingId!, r.waypointId,
+                '${r.number} · ${r.name}'),
+          ),
         );
-      },
-    );
-  }
-
-  Future<void> _navigateToPerson(
-      BuildContext context, WidgetRef ref, Person p) async {
-    if (p.roomId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No office set for ${p.name}')),
-      );
-      return;
+      case _Kind.person:
+        final p = result.person!;
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundImage:
+                  p.photoUrl != null ? NetworkImage(p.photoUrl!) : null,
+              child: p.photoUrl == null
+                  ? Text(p.name.isNotEmpty ? p.name[0] : '?')
+                  : null,
+            ),
+            title: Text(p.name,
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+            subtitle: Text('${p.role} · ${p.department}'),
+            trailing: const Icon(Icons.navigation_rounded),
+            onTap: () async {
+              if (p.roomId == null) return;
+              final match = rooms
+                  .where((r) => r.room.id == p.roomId)
+                  .firstOrNull;
+              if (match == null || !context.mounted) return;
+              _startNavigation(context, match.buildingId,
+                  match.room.waypointId, "${p.name}'s office");
+            },
+          ),
+        );
+      case _Kind.event:
+        final e = result.event!;
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: const Icon(Icons.event_rounded),
+            title: Text(e.title),
+            subtitle: Text('Floor ${e.floor} · ${e.buildingId}'),
+            onTap: () => context.push('/building/${e.buildingId}'),
+          ),
+        );
     }
-    final rooms =
-        await ref.read(buildingsRepositoryProvider).rooms(p.buildingId);
-    final room = rooms.where((r) => r.id == p.roomId).firstOrNull;
-    if (!context.mounted) return;
-    if (room == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("${p.name}'s office (${p.roomId}) not found")),
-      );
-      return;
-    }
-    _startNavigation(
-        context, p.buildingId, room.waypointId, "${p.name}'s office");
   }
 }
 
-class _EventsTab extends ConsumerWidget {
-  const _EventsTab({required this.query});
-  final String query;
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final events = ref.watch(_allEventsProvider);
-    return events.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('$e')),
-      data: (list) {
-        final filtered = query.isEmpty
-            ? list
-            : list
-                .where((e) =>
-                    e.title.toLowerCase().contains(query) ||
-                    e.description.toLowerCase().contains(query))
-                .toList();
-        if (filtered.isEmpty) return const _Empty('No events');
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: filtered.length,
-          itemBuilder: (_, i) {
-            final e = filtered[i];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                leading: const Icon(Icons.event_rounded),
-                title: Text(e.title),
-                subtitle: Text('Floor ${e.floor}'),
-                onTap: () => context.push('/building/${e.buildingId}'),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-void _startNavigation(
-    BuildContext context, String buildingId, String endWaypoint, String label) {
+void _startNavigation(BuildContext context, String buildingId,
+    String endWaypoint, String label) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -240,15 +246,4 @@ void _startNavigation(
       destinationLabel: label,
     ),
   );
-}
-
-class _Empty extends StatelessWidget {
-  const _Empty(this.text);
-  final String text;
-  @override
-  Widget build(BuildContext context) => Center(
-        child: Text(text,
-            style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant)),
-      );
 }

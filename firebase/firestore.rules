@@ -6,6 +6,7 @@ service cloud.firestore {
       return signedIn() && request.auth.token.role == 'admin';
     }
 
+    // Self for own profile, admin for everyone.
     match /users/{uid} {
       allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow list: if isAdmin();
@@ -14,6 +15,7 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Public read for shared campus data; writes only by admins.
     match /buildings/{buildingId} {
       allow read: if signedIn();
       allow write: if isAdmin();
