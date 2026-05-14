@@ -1,0 +1,349 @@
+
+<style>
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.ftab{padding:5px 12px;font-size:13px;cursor:pointer;border-radius:var(--border-radius-md);transition:background .15s,color .15s}
+.ftab:hover{background:var(--color-background-secondary)}
+.rm{cursor:pointer}
+.dv{cursor:pointer}
+.dismiss-btn{width:100%;padding:7px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-size:12px;margin-top:12px}
+</style>
+
+<div id="root" style="font-family:var(--font-sans)"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script>
+const {useState,createElement:h} = React;
+
+const RT = {
+  class:   {f:"#E6F1FB",s:"#185FA5",t:"#0C447C"},
+  office:  {f:"#F1EFE8",s:"#888780",t:"#444441"},
+  lab:     {f:"#E1F5EE",s:"#1D9E75",t:"#085041"},
+  special: {f:"#EEEDFE",s:"#7F77DD",t:"#3C3489"},
+  corridor:{f:"#FAFAF8",s:"#D3D1C7",t:"#B4B2A9"},
+};
+const DT = {
+  ap:    {f:"#E1F5EE",s:"#0F6E56",t:"#085041",l:"Access point"},
+  switch:{f:"#FAEEDA",s:"#BA7517",t:"#633806",l:"Switch"},
+  core:  {f:"#EEEDFE",s:"#7F77DD",t:"#3C3489",l:"Core switch"},
+};
+const TL = {class:"Classroom",office:"Office",lab:"Laboratory",special:"Special",corridor:"Corridor"};
+
+const FLOORS = [
+  {id:"0",label:"О давхар",sub:"Ground floor",vw:1100,vh:445,
+   bldg:[{x:10,y:10,w:260,h:430},{x:270,y:10,w:820,h:315}],
+   rooms:[
+     {id:"008",x:10,y:10,w:130,h:160,n:"Склад-2",t:"office"},
+     {id:"009",x:10,y:170,w:130,h:80,n:"Дадлагын газар",t:"lab"},
+     {id:"010",x:10,y:250,w:130,h:80,n:"Металл судлалын лаборатори",t:"lab"},
+     {id:"011",x:10,y:330,w:130,h:110,n:"Токарын лаборатори",t:"lab"},
+     {id:"012",x:140,y:330,w:130,h:110,n:"Авто оношилгоо засварын газар",t:"lab"},
+     {id:"006",x:270,y:330,w:100,h:110,n:"Склад-1",t:"office"},
+     {id:"007",x:370,y:330,w:100,h:110,n:"Ажилчдын өрөо",t:"office"},
+     {id:"005",x:470,y:330,w:100,h:110,n:"Багш нарын өрөо",t:"office"},
+     {id:"004",x:570,y:330,w:100,h:110,n:"Мужааны өрөо",t:"office"},
+     {id:"003",x:670,y:330,w:120,h:110,n:"Хичзэлийн танхим",t:"class"},
+     {id:"015",x:270,y:10,w:150,h:130,n:"Симуляторын лаборатори",t:"lab"},
+     {id:"016",x:270,y:140,w:150,h:80,n:"Багш нарын өрөо",t:"office"},
+     {id:"014",x:420,y:10,w:140,h:210,n:"Хичзэлийн танхим",t:"class"},
+     {id:"013",x:560,y:10,w:140,h:110,n:"Багш нарын өрөо",t:"office"},
+     {id:"017",x:560,y:220,w:90,h:80,n:"ШИТ-ны өрөо",t:"office"},
+     {id:"018",x:650,y:220,w:80,h:80,n:"Ажилчдын өрөо",t:"office"},
+     {id:"019",x:730,y:220,w:80,h:80,n:"Багш нарын өрөо",t:"office"},
+     {id:"020",x:810,y:220,w:80,h:80,n:"Цахилгааны лаб-1",t:"lab"},
+     {id:"021",x:890,y:220,w:80,h:80,n:"Цахилгааны лаб-2",t:"lab"},
+     {id:"022",x:700,y:10,w:140,h:110,n:"Гидрометаллургийн лаборатори",t:"lab"},
+     {id:"023",x:840,y:10,w:130,h:110,n:"Хими, Гидравлик лаборатори",t:"lab"},
+     {id:"024",x:970,y:10,w:120,h:110,n:"Мэргэжлийн сургалтын склад",t:"office"},
+     {id:"001",x:800,y:330,w:150,h:110,n:"Виртуал лаборатори",t:"lab"},
+     {id:"002",x:950,y:330,w:140,h:110,n:"ХАБЭА-н лаборатори",t:"lab"},
+   ],
+   devices:[
+     {id:"gw01",t:"ap",x:155,y:270,m:"GWN7610",lb:"AP-1"},
+     {id:"gw02",t:"ap",x:345,y:210,m:"GWN7610",lb:"AP-2"},
+     {id:"gw03",t:"ap",x:895,y:395,m:"GWN7610",lb:"AP-3"},
+     {id:"sw01",t:"switch",x:390,y:175,m:"TPlink 28 port",lb:"SW-1"},
+     {id:"sw02",t:"switch",x:670,y:175,m:"TPlink 28 port",lb:"SW-2"},
+     {id:"sw03",t:"switch",x:840,y:155,m:"CISCO SG-350 28port",lb:"SW-3"},
+   ],
+   uplinks:[{x:390,lb:"110-Up"},{x:670,lb:"107-Up"}]},
+
+  {id:"1",label:"1 давхар",sub:"First floor",vw:1340,vh:450,
+   bldg:[{x:10,y:0,w:1200,h:450},{x:830,y:0,w:500,h:290}],
+   rooms:[
+     {id:"106",x:10,y:300,w:100,h:140,n:"Хичзэлийн танхим",t:"class"},
+     {id:"105",x:110,y:300,w:100,h:140,n:"Албан өрөо",t:"office"},
+     {id:"104",x:210,y:300,w:100,h:140,n:"Хичзэлийн танхим",t:"class"},
+     {id:"103",x:310,y:300,w:100,h:140,n:"Хичзэлийн танхим",t:"class"},
+     {id:"102",x:410,y:300,w:100,h:140,n:"Хичзэлийн танхим",t:"class"},
+     {id:"101",x:510,y:300,w:100,h:140,n:"Хичзэлийн танхим",t:"class"},
+     {id:"107",x:610,y:300,w:80,h:140,n:"Албан өрөо",t:"office"},
+     {id:"108",x:690,y:300,w:80,h:140,n:"Багш нарын өрөо",t:"office"},
+     {id:"109",x:770,y:300,w:80,h:140,n:"Багш нарын өрөо",t:"office"},
+     {id:"110",x:850,y:300,w:80,h:140,n:"Албан өрөо",t:"office"},
+     {id:"111",x:930,y:300,w:80,h:140,n:"Багш нарын өрөо",t:"office"},
+     {id:"112",x:1010,y:300,w:70,h:140,n:"Албан өрөо",t:"office"},
+     {id:"113",x:1080,y:300,w:70,h:140,n:"Албан өрөо",t:"office"},
+     {id:"114",x:1150,y:300,w:70,h:140,n:"Албан өрөо",t:"office"},
+     {id:"r23",x:830,y:10,w:90,h:80,n:"Коридор",t:"corridor"},
+     {id:"r22",x:920,y:10,w:85,h:80,n:"00-н өрөо",t:"office"},
+     {id:"r21",x:1005,y:10,w:80,h:80,n:"Агаарнуулалт",t:"office"},
+     {id:"r20",x:1085,y:10,w:80,h:80,n:"Серрийн өрөо",t:"office"},
+     {id:"r19",x:1165,y:10,w:80,h:80,n:"Коридор",t:"corridor"},
+     {id:"r18",x:1245,y:10,w:85,h:80,n:"Мэдэзлэлийн тев",t:"office"},
+     {id:"r13",x:920,y:90,w:90,h:80,n:"Коридор",t:"corridor"},
+     {id:"r14",x:1010,y:90,w:90,h:80,n:"ШИТ-ний өрөо",t:"office"},
+     {id:"r12",x:1100,y:90,w:90,h:80,n:"Албан өрөо",t:"office"},
+     {id:"r11",x:1190,y:90,w:140,h:80,n:"Хоолны зал",t:"special"},
+     {id:"r9",x:830,y:170,w:100,h:80,n:"Албан өрөо",t:"office"},
+     {id:"r10",x:930,y:170,w:80,h:80,n:"СКЛАД",t:"office"},
+     {id:"r2",x:1190,y:170,w:140,h:130,n:"Номын фонд",t:"special"},
+     {id:"r5",x:1220,y:300,w:110,h:140,n:"Vip өрөо",t:"special"},
+   ],
+   devices:[
+     {id:"tp1",t:"switch",x:130,y:280,m:"TPlink 8 port",lb:"SW-1"},
+     {id:"cs1",t:"switch",x:880,y:280,m:"CISCO SG-360 28port",lb:"SW-2"},
+     {id:"tp2",t:"switch",x:1040,y:280,m:"TPlink 8 port",lb:"SW-3"},
+     {id:"cat",t:"core",x:1080,y:240,m:"Cisco Catalyst 2960 48P",lb:"Core"},
+     {id:"gw1",t:"ap",x:1050,y:430,m:"GWN7660",lb:"AP-1"},
+     {id:"gw2",t:"ap",x:1120,y:430,m:"GWN7660",lb:"AP-2"},
+     {id:"cs2",t:"switch",x:1060,y:155,m:"CISCO SG-350 28port",lb:"SW-4"},
+     {id:"cs3",t:"switch",x:1240,y:265,m:"CISCO SF300 24port",lb:"SW-5"},
+     {id:"gw3",t:"ap",x:1200,y:48,m:"GWN7615 026",lb:"AP-3"},
+   ],
+   uplinks:[{x:300,lb:"MT-Up"},{x:1050,lb:"203-Up"},{x:1150,lb:"ОБ-up"}]},
+
+  {id:"2",label:"2 давхар",sub:"Second floor",vw:1340,vh:450,
+   bldg:[{x:10,y:0,w:1200,h:450},{x:1210,y:0,w:120,h:450}],
+   rooms:[
+     {id:"207",x:10,y:300,w:100,h:140,n:"Захирлын өрөо",t:"special"},
+     {id:"208",x:110,y:300,w:100,h:140,n:"Албан өрөо",t:"office"},
+     {id:"209",x:210,y:300,w:100,h:140,n:"Сургалт дэд захирал",t:"special"},
+     {id:"210",x:310,y:300,w:90,h:140,n:"Албан өрөо",t:"office"},
+     {id:"211",x:400,y:300,w:90,h:140,n:"Албан өрөо",t:"office"},
+     {id:"212",x:490,y:300,w:90,h:140,n:"Багш нарын өрөо",t:"office"},
+     {id:"213",x:580,y:300,w:90,h:140,n:"Багш нарын өрөо",t:"office"},
+     {id:"206",x:670,y:300,w:90,h:140,n:"Эрдмийн зовлол",t:"special"},
+     {id:"205",x:760,y:300,w:90,h:140,n:"Албан өрөо",t:"office"},
+     {id:"204",x:850,y:300,w:90,h:140,n:"Багш нарын өрөо",t:"office"},
+     {id:"203",x:940,y:300,w:80,h:140,n:"Багш нарын өрөо",t:"office"},
+     {id:"202",x:1020,y:300,w:90,h:140,n:"30-ком лаб",t:"lab"},
+     {id:"201",x:1110,y:300,w:100,h:140,n:"Фонд",t:"office"},
+     {id:"e7",x:1210,y:10,w:120,h:80,n:"Спорт зал",t:"special"},
+     {id:"e11",x:1210,y:90,w:65,h:80,n:"Багшийн өрөо",t:"office"},
+     {id:"e14",x:1210,y:170,w:65,h:80,n:"Хүндэтгалийн танхим",t:"special"},
+     {id:"e1",x:1275,y:90,w:65,h:360,n:"Лекцийн зал",t:"class"},
+     {id:"e15",x:1110,y:10,w:100,h:130,n:"(зона 15)",t:"corridor"},
+     {id:"e9",x:1110,y:140,w:100,h:80,n:"Хүвцас солих өрөо",t:"office"},
+   ],
+   devices:[
+     {id:"gw1",t:"ap",x:55,y:280,m:"GWN7615",lb:"AP-1"},
+     {id:"gw2",t:"ap",x:880,y:430,m:"GWN7660",lb:"AP-2"},
+     {id:"cat",t:"core",x:880,y:280,m:"CISCO Cat2960 48P",lb:"Core"},
+     {id:"gw3",t:"ap",x:1145,y:95,m:"GWN7615",lb:"AP-3"},
+     {id:"gw4",t:"ap",x:1307,y:350,m:"GWN7660",lb:"AP-4"},
+     {id:"gw5",t:"ap",x:1240,y:240,m:"GWN7615",lb:"AP-5"},
+     {id:"tp1",t:"switch",x:1165,y:170,m:"TPlink 16P",lb:"SW-1"},
+     {id:"tp2",t:"switch",x:1165,y:255,m:"TPlink 16P",lb:"SW-2"},
+   ],
+   uplinks:[{x:940,lb:"3дав Up306"},{x:1025,lb:"1дав Up110"},{x:1110,lb:"Server-up"}]},
+
+  {id:"3",label:"3 давхар",sub:"Third floor",vw:1000,vh:380,
+   bldg:[{x:10,y:10,w:780,h:360},{x:790,y:10,w:200,h:360}],
+   rooms:[
+     {id:"307",x:150,y:10,w:90,h:100,n:"Багш нарын өрөо",t:"office"},
+     {id:"308",x:240,y:10,w:90,h:100,n:"Агаажуулалтын өрөо",t:"office"},
+     {id:"309",x:330,y:10,w:90,h:100,n:"Багш нарын өрөо",t:"office"},
+     {id:"310",x:420,y:10,w:90,h:100,n:"Багш нарын өрөо",t:"office"},
+     {id:"311",x:510,y:10,w:90,h:100,n:"Багш нарын өрөо",t:"office"},
+     {id:"312",x:600,y:10,w:90,h:100,n:"Агаажуулалтын өрөо",t:"office"},
+     {id:"313",x:690,y:10,w:90,h:100,n:"Багш нарын өрөо",t:"office"},
+     {id:"305",x:240,y:250,w:110,h:120,n:"Хичзэлийн танхим",t:"class"},
+     {id:"304",x:350,y:250,w:110,h:120,n:"Хичзэлийн танхим",t:"class"},
+     {id:"303",x:460,y:250,w:110,h:120,n:"Хичзэлийн танхим",t:"class"},
+     {id:"302",x:570,y:250,w:110,h:120,n:"Хичзэлийн танхим",t:"class"},
+     {id:"301",x:680,y:250,w:110,h:120,n:"Архив",t:"office"},
+     {id:"306",x:150,y:200,w:90,h:170,n:"30-ком лаб",t:"lab"},
+     {id:"306a",x:60,y:200,w:90,h:170,n:"10-ком лаб (А)",t:"lab"},
+     {id:"306b",x:10,y:100,w:140,h:100,n:"Багш нарын өрөо",t:"office"},
+     {id:"rw",x:790,y:10,w:200,h:360,n:"Багш нар зона",t:"office"},
+   ],
+   devices:[
+     {id:"lgs",t:"switch",x:185,y:225,m:"Linksys LGS28P",lb:"SW-1"},
+     {id:"tp24",t:"switch",x:95,y:355,m:"TPlink 24port",lb:"SW-2"},
+     {id:"tp8",t:"switch",x:545,y:55,m:"TPlink 8port",lb:"SW-3"},
+     {id:"gw1",t:"ap",x:20,y:348,m:"GWN7610",lb:"AP-1"},
+     {id:"gw2",t:"ap",x:792,y:200,m:"GWN7610",lb:"AP-2"},
+   ],
+   uplinks:[{x:185,lb:"203-up"}]},
+];
+
+function App() {
+  const [fid,setFid] = useState("1");
+  const [sel,setSel] = useState(null);
+  const fl = FLOORS.find(f=>f.id===fid);
+  const sR = sel&&sel.k==="r" ? fl.rooms.find(r=>r.id===sel.id) : null;
+  const sD = sel&&sel.k==="d" ? fl.devices.find(d=>d.id===sel.id) : null;
+  const aps = fl.devices.filter(d=>d.t==="ap").length;
+  const sws = fl.devices.filter(d=>d.t!=="ap").length;
+  const pick=(k,id)=>setSel(p=>p&&p.id===id?null:{k,id});
+
+  const svgMap = h("svg",{
+    viewBox:`0 0 ${fl.vw} ${fl.vh}`,
+    style:{width:"100%",minWidth:"480px",height:"auto",display:"block"},
+    role:"img","aria-label":`Floor plan ${fl.label}`,
+  },
+    h("defs",null,
+      h("pattern",{id:"gr",x:0,y:0,width:40,height:40,patternUnits:"userSpaceOnUse"},
+        h("path",{d:"M 40 0 L 0 0 0 40",fill:"none",stroke:"#D3D1C7",strokeWidth:"0.3"})
+      )
+    ),
+    h("rect",{width:fl.vw,height:fl.vh,fill:"url(#gr)",opacity:"0.5"}),
+
+    // building bg
+    fl.bldg&&fl.bldg.map((b,i)=>h("rect",{key:i,x:b.x,y:b.y,width:b.w,height:b.h,rx:4,
+      fill:"#F9F8F6",stroke:"#B4B2A9",strokeWidth:"0.5"})),
+
+    // uplinks
+    fl.uplinks&&fl.uplinks.map((u,i)=>h("g",{key:"u"+i},
+      h("line",{x1:u.x,y1:0,x2:u.x,y2:fl.vh,stroke:"#378ADD",strokeWidth:"1",strokeDasharray:"5,4",opacity:"0.5"}),
+      h("rect",{x:u.x-24,y:2,width:48,height:15,rx:2,fill:"#E6F1FB",stroke:"#378ADD",strokeWidth:"0.5"}),
+      h("text",{x:u.x,y:13,textAnchor:"middle",fill:"#0C447C",fontSize:"7.5",fontFamily:"monospace"},u.lb)
+    )),
+
+    // rooms
+    fl.rooms.map(r=>{
+      const c=RT[r.t]||RT.office, iS=sel&&sel.id===r.id;
+      return h("g",{key:r.id,className:"rm",onClick:()=>pick("r",r.id)},
+        h("rect",{x:r.x,y:r.y,width:r.w,height:r.h,rx:2,
+          fill:iS?"#B5D4F4":c.f, stroke:iS?"#185FA5":c.s, strokeWidth:iS?"2":"0.8"}),
+        h("text",{x:r.x+4,y:r.y+12,fill:iS?"#0C447C":c.t,
+          fontSize:"8.5",fontWeight:"500",fontFamily:"monospace"},r.id),
+        r.h>35&&h("text",{x:r.x+4,y:r.y+23,fill:iS?"#185FA5":c.t,
+          fontSize:"7.5",opacity:"0.85"},r.n.length>14?r.n.slice(0,13)+"…":r.n)
+      );
+    }),
+
+    // devices
+    fl.devices.map(d=>{
+      const c=DT[d.t]||DT.switch, iS=sel&&sel.id===d.id, r=d.t==="ap"?13:10;
+      return h("g",{key:d.id,className:"dv",onClick:()=>pick("d",d.id)},
+        h("circle",{cx:d.x,cy:d.y,r:r+5,fill:iS?c.s:c.f,fillOpacity:"0.25",
+          stroke:c.s,strokeWidth:"0.5",strokeDasharray:"3,2"}),
+        h("circle",{cx:d.x,cy:d.y,r,fill:iS?c.s:c.f,stroke:c.s,strokeWidth:iS?"2":"1.2"}),
+        h("text",{x:d.x,y:d.y+3.5,textAnchor:"middle",fill:iS?"#fff":c.t,
+          fontSize:"6.5",fontWeight:"500",fontFamily:"monospace"},d.lb)
+      );
+    })
+  );
+
+  const legend = h("div",{style:{display:"flex",gap:"10px",flexWrap:"wrap",
+    paddingTop:"8px",borderTop:"0.5px solid var(--color-border-tertiary)",marginTop:"8px"}},
+    ...[
+      {f:"#E6F1FB",s:"#185FA5",l:"Classroom"},
+      {f:"#E1F5EE",s:"#1D9E75",l:"Lab"},
+      {f:"#EEEDFE",s:"#7F77DD",l:"Special"},
+      {f:"#F1EFE8",s:"#888780",l:"Office"},
+      {f:"#E1F5EE",s:"#0F6E56",l:"Access point",r:true},
+      {f:"#FAEEDA",s:"#BA7517",l:"Switch",r:true},
+      {f:"#EEEDFE",s:"#7F77DD",l:"Core switch",r:true},
+    ].map(l=>h("div",{key:l.l,style:{display:"flex",alignItems:"center",gap:"4px"}},
+      h("div",{style:{width:"10px",height:l.r?"10px":"8px",
+        borderRadius:l.r?"50%":"2px",background:l.f,border:`1px solid ${l.s}`}}),
+      h("span",{style:{fontSize:"11px",color:"var(--color-text-secondary)"}},l.l)
+    )),
+    h("div",{style:{display:"flex",alignItems:"center",gap:"4px"}},
+      h("div",{style:{width:"16px",height:"2px",background:"#378ADD",opacity:"0.6"}}),
+      h("span",{style:{fontSize:"11px",color:"var(--color-text-secondary)"}},"Uplink")
+    )
+  );
+
+  const panel = (sR||sD) && h("div",{style:{
+    width:"200px",flexShrink:0,
+    background:"var(--color-background-primary)",
+    borderRadius:"var(--border-radius-lg)",
+    border:"0.5px solid var(--color-border-tertiary)",
+    padding:"14px",
+  }},
+    sR && h("div",null,
+      h("p",{style:{fontSize:"10px",color:"var(--color-text-tertiary)",margin:"0 0 3px",
+        letterSpacing:"0.5px",textTransform:"uppercase"}},"Room"),
+      h("p",{style:{fontSize:"26px",fontWeight:500,margin:"0 0 6px",
+        fontFamily:"var(--font-mono)",color:"var(--color-text-primary)"}},sR.id),
+      h("p",{style:{fontSize:"13px",color:"var(--color-text-primary)",margin:"0 0 10px",lineHeight:"1.4"}},sR.n),
+      h("div",{style:{display:"inline-block",padding:"3px 9px",
+        borderRadius:"var(--border-radius-md)",
+        background:(RT[sR.t]||RT.office).f,
+        border:`0.5px solid ${(RT[sR.t]||RT.office).s}`,
+        fontSize:"11px",color:(RT[sR.t]||RT.office).t,fontWeight:500,marginBottom:"10px"}},
+        TL[sR.t]||sR.t
+      ),
+      h("p",{style:{fontSize:"11px",color:"var(--color-text-secondary)",margin:0}},`${fl.label} · ${fl.sub}`)
+    ),
+    sD && h("div",null,
+      h("p",{style:{fontSize:"10px",color:"var(--color-text-tertiary)",margin:"0 0 3px",
+        letterSpacing:"0.5px",textTransform:"uppercase"}},"Network device"),
+      h("p",{style:{fontSize:"22px",fontWeight:500,margin:"0 0 10px",
+        color:"var(--color-text-primary)"}},sD.lb),
+      ...([
+        {l:"Model",v:sD.m,mono:true},
+        {l:"Type",v:(DT[sD.t]||DT.switch).l},
+        {l:"Floor",v:fl.label},
+        {l:"Status",v:"Online",ok:true},
+      ].map(row=>h("div",{key:row.l,style:{
+        display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:"6px",
+        padding:"6px 0",borderBottom:"0.5px solid var(--color-border-tertiary)"}},
+        h("span",{style:{fontSize:"11px",color:"var(--color-text-secondary)",flexShrink:0}},row.l),
+        h("span",{style:{fontSize:"11px",fontWeight:500,textAlign:"right",
+          color:row.ok?"var(--color-text-success)":"var(--color-text-primary)",
+          fontFamily:row.mono?"var(--font-mono)":"inherit"}},row.v)
+      )))
+    ),
+    h("button",{className:"dismiss-btn",onClick:()=>setSel(null)},"Dismiss")
+  );
+
+  return h("div",{style:{fontFamily:"var(--font-sans)"}},
+    h("span",{className:"sr-only"},`Campus map — ${fl.label}`),
+
+    h("div",{style:{display:"flex",alignItems:"center",flexWrap:"wrap",gap:"8px",
+      paddingBottom:"10px",borderBottom:"0.5px solid var(--color-border-tertiary)",marginBottom:"10px"}},
+      h("div",null,
+        h("p",{style:{fontSize:"17px",fontWeight:500,margin:0,color:"var(--color-text-primary)"}},"Campus map"),
+        h("p",{style:{fontSize:"12px",color:"var(--color-text-secondary)",margin:0}},"Хичзэлийн I байр — click rooms or devices")
+      ),
+      h("div",{style:{marginLeft:"auto",display:"flex",gap:"6px"}},
+        ...[{v:fl.rooms.length,l:"rooms",c:"var(--color-text-secondary)"},
+            {v:aps,l:"APs",c:"#0F6E56"},
+            {v:sws,l:"switches",c:"#854F0B"}].map(s=>
+          h("div",{key:s.l,style:{background:"var(--color-background-secondary)",
+            borderRadius:"var(--border-radius-md)",padding:"5px 10px",textAlign:"center",minWidth:"52px"}},
+            h("div",{style:{fontSize:"17px",fontWeight:500,color:s.c,lineHeight:1}},s.v),
+            h("div",{style:{fontSize:"11px",color:"var(--color-text-secondary)",marginTop:"2px"}},s.l)
+          )
+        )
+      )
+    ),
+
+    h("div",{style:{display:"flex",gap:"4px",marginBottom:"10px",flexWrap:"wrap"}},
+      ...FLOORS.map(f=>h("button",{key:f.id,className:"ftab",onClick:()=>{setFid(f.id);setSel(null);},
+        style:{border:`0.5px solid ${fid===f.id?"var(--color-border-info)":"var(--color-border-secondary)"}`,
+          background:fid===f.id?"var(--color-background-info)":"transparent",
+          color:fid===f.id?"var(--color-text-info)":"var(--color-text-secondary)",
+          fontWeight:fid===f.id?500:400}},f.label)),
+      h("span",{style:{marginLeft:"auto",fontSize:"11px",color:"var(--color-text-tertiary)",
+        alignSelf:"center"}},fl.sub)
+    ),
+
+    h("div",{style:{display:"flex",gap:"10px",alignItems:"flex-start"}},
+      h("div",{style:{flex:1,minWidth:0,background:"var(--color-background-secondary)",
+        borderRadius:"var(--border-radius-lg)",border:"0.5px solid var(--color-border-tertiary)",
+        padding:"10px",overflowX:"auto"}},
+        svgMap, legend
+      ),
+      panel
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+</script>

@@ -2,16 +2,24 @@ import 'package:collection/collection.dart';
 
 import 'package:ts_management/data/models/waypoint.dart';
 
+class BilingualStep {
+  final String mn;
+  final String en;
+  const BilingualStep(this.mn, this.en);
+}
+
 class RouteSegment {
   final int floor;
   final List<Waypoint> nodes;
-  final List<String> instructions;
+  final List<String> instructions; // English (legacy)
+  final List<BilingualStep> steps;
   final double distance;
 
   RouteSegment({
     required this.floor,
     required this.nodes,
     required this.instructions,
+    required this.steps,
     required this.distance,
   });
 }
@@ -19,7 +27,7 @@ class RouteSegment {
 class ComputedRoute {
   final List<Waypoint> path;
   final List<GraphEdge> edges;
-  final List<RouteSegment> segments; // grouped per-floor for UI
+  final List<RouteSegment> segments;
   final double totalDistance;
 
   ComputedRoute({
@@ -33,7 +41,6 @@ class ComputedRoute {
 }
 
 class RoutingService {
-  /// Dijkstra over the waypoint graph.
   ComputedRoute findRoute(NavigationGraph graph, String startId, String endId) {
     if (startId == endId) {
       return ComputedRoute(
@@ -45,12 +52,11 @@ class RoutingService {
       return ComputedRoute(path: [], edges: [], segments: [], totalDistance: 0);
     }
 
-    // Adjacency list (undirected)
     final adj = <String, List<GraphEdge>>{};
     for (final e in graph.edges) {
       adj.putIfAbsent(e.from, () => []).add(e);
-      adj.putIfAbsent(e.to, () => []).add(
-          GraphEdge(from: e.to, to: e.from, weight: e.weight, instruction: e.instruction));
+      adj.putIfAbsent(e.to, () => []).add(GraphEdge(
+          from: e.to, to: e.from, weight: e.weight, instruction: e.instruction));
     }
 
     final dist = <String, double>{startId: 0};
@@ -95,12 +101,10 @@ class RoutingService {
       final e = prevEdge[pathIds.reversed.elementAt(i)];
       if (e != null) edges.add(e);
     }
-
-    final segments = _segmentByFloor(path, edges);
     return ComputedRoute(
       path: path,
       edges: edges,
-      segments: segments,
+      segments: _segmentByFloor(path, edges),
       totalDistance: dist[endId] ?? 0,
     );
   }
@@ -112,14 +116,16 @@ class RoutingService {
     var currentFloor = path.first.floor;
     var nodeBuf = <Waypoint>[path.first];
     var instrBuf = <String>[];
+    var stepBuf = <BilingualStep>[];
     var distBuf = 0.0;
 
     for (var i = 1; i < path.length; i++) {
       final node = path[i];
       final edge = edges[i - 1];
       distBuf += edge.weight;
-      final instr = edge.instruction ?? _fallbackInstruction(path[i - 1], node);
-      instrBuf.add(instr);
+      final step = _stepFor(path[i - 1], node, edge);
+      instrBuf.add(step.en);
+      stepBuf.add(step);
       nodeBuf.add(node);
 
       if (node.floor != currentFloor) {
@@ -127,11 +133,13 @@ class RoutingService {
           floor: currentFloor,
           nodes: List.of(nodeBuf),
           instructions: List.of(instrBuf),
+          steps: List.of(stepBuf),
           distance: distBuf,
         ));
         currentFloor = node.floor;
         nodeBuf = [node];
         instrBuf = [];
+        stepBuf = [];
         distBuf = 0;
       }
     }
@@ -139,23 +147,55 @@ class RoutingService {
       floor: currentFloor,
       nodes: nodeBuf,
       instructions: instrBuf,
+      steps: stepBuf,
       distance: distBuf,
     ));
     return segments;
   }
 
-  String _fallbackInstruction(Waypoint a, Waypoint b) {
+  BilingualStep _stepFor(Waypoint a, Waypoint b, GraphEdge edge) {
     if (a.floor != b.floor) {
-      return b.type == WaypointType.elevator
-          ? 'Take the elevator to floor ${b.floor}'
-          : 'Take the stairs to floor ${b.floor}';
+      if (b.type == WaypointType.elevator) {
+        return BilingualStep(
+          'Лифтээр ${b.floor}-р давхар руу яв',
+          'Take the elevator to floor ${b.floor}',
+        );
+      }
+      return BilingualStep(
+        'Шатаар ${b.floor}-р давхар руу яв',
+        'Take the stairs to floor ${b.floor}',
+      );
+    }
+    if (edge.instruction != null && edge.instruction!.isNotEmpty) {
+      return BilingualStep(edge.instruction!, edge.instruction!);
     }
     final dx = b.x - a.x;
     final dy = b.y - a.y;
+    final meters = (edge.weight).round();
     if (dx.abs() > dy.abs()) {
-      return dx > 0 ? 'Walk right' : 'Walk left';
+      // east (У) / west (З)
+      if (dx > 0) {
+        return BilingualStep(
+          'Баруун тийш ${meters}м яв',
+          'Walk right ~${meters}m',
+        );
+      }
+      return BilingualStep(
+        'Зүүн тийш ${meters}м яв',
+        'Walk left ~${meters}m',
+      );
     } else {
-      return dy > 0 ? 'Walk forward' : 'Walk back';
+      // north (ТА) / south (Б)
+      if (dy < 0) {
+        return BilingualStep(
+          'Урагш ${meters}м яв',
+          'Walk forward ~${meters}m',
+        );
+      }
+      return BilingualStep(
+        'Хойш ${meters}м яв',
+        'Walk back ~${meters}m',
+      );
     }
   }
 }

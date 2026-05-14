@@ -1,5 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+const eventCategories = <String>[
+  'general',
+  'lecture',
+  'workshop',
+  'pitch',
+  'career-fair',
+];
+
 class CampusEvent {
   final String id;
   final String title;
@@ -10,6 +18,7 @@ class CampusEvent {
   final DateTime startTime;
   final DateTime endTime;
   final String category;
+  final bool featured;
   final String? createdBy;
 
   CampusEvent({
@@ -22,6 +31,7 @@ class CampusEvent {
     required this.startTime,
     required this.endTime,
     this.category = 'general',
+    this.featured = false,
     this.createdBy,
   });
 
@@ -35,6 +45,7 @@ class CampusEvent {
         startTime: (m['startTime'] as Timestamp).toDate(),
         endTime: (m['endTime'] as Timestamp).toDate(),
         category: (m['category'] ?? 'general') as String,
+        featured: (m['featured'] ?? false) as bool,
         createdBy: m['createdBy'] as String?,
       );
 
@@ -47,6 +58,7 @@ class CampusEvent {
         'startTime': Timestamp.fromDate(startTime),
         'endTime': Timestamp.fromDate(endTime),
         'category': category,
+        'featured': featured,
         'createdBy': createdBy,
       };
 

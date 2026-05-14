@@ -14,7 +14,7 @@ flutter pub get
 1. Go to https://console.firebase.google.com → "Add project". Pick a name (e.g. `smart-campus-app`).
 2. Enable: **Authentication** (Email/Password + Google), **Firestore Database** (production mode), **Storage**, **Cloud Messaging**.
 3. Add an Android app with package name `com.example.ts_management` (or whatever you set in `android/app/build.gradle`). Download `google-services.json` to `android/app/`.
-
+r
 ## 3. Wire Firebase to the Flutter project
 
 ```powershell

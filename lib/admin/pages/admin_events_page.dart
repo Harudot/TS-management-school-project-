@@ -52,10 +52,16 @@ class AdminEventsPage extends ConsumerWidget {
                       .map((e) => Card(
                             margin: const EdgeInsets.only(bottom: 8),
                             child: ListTile(
-                              leading: const Icon(Icons.event_rounded),
+                              leading: Icon(
+                                  e.featured
+                                      ? Icons.push_pin_rounded
+                                      : Icons.event_rounded,
+                                  color: e.featured
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null),
                               title: Text(e.title),
                               subtitle: Text(
-                                  '${e.buildingId} · F${e.floor} · ${fmt.format(e.startTime)} – ${fmt.format(e.endTime)}'),
+                                  '${e.buildingId} · F${e.floor} · ${e.category} · ${fmt.format(e.startTime)} – ${fmt.format(e.endTime)}'),
                               trailing: Wrap(children: [
                                 IconButton(
                                   icon: const Icon(Icons.edit_outlined),
@@ -85,7 +91,8 @@ class AdminEventsPage extends ConsumerWidget {
     final building = TextEditingController(text: e?.buildingId ?? '');
     final floor = TextEditingController(text: '${e?.floor ?? 1}');
     final room = TextEditingController(text: e?.roomId ?? '');
-    final category = TextEditingController(text: e?.category ?? 'general');
+    var category = e?.category ?? 'general';
+    var featured = e?.featured ?? false;
     var start = e?.startTime ?? DateTime.now().add(const Duration(hours: 1));
     var end = e?.endTime ?? DateTime.now().add(const Duration(hours: 3));
     showDialog(
@@ -94,46 +101,89 @@ class AdminEventsPage extends ConsumerWidget {
         builder: (context, setState) => AlertDialog(
           title: Text(e == null ? 'New event' : 'Edit ${e.title}'),
           content: SizedBox(
-            width: 420,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(controller: id, enabled: e == null, decoration: const InputDecoration(labelText: 'ID')),
-                TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
-                TextField(controller: desc, decoration: const InputDecoration(labelText: 'Description'), maxLines: 3),
-                TextField(controller: building, decoration: const InputDecoration(labelText: 'Building ID')),
-                Row(children: [
-                  Expanded(child: TextField(controller: floor, decoration: const InputDecoration(labelText: 'Floor'))),
-                  const SizedBox(width: 8),
-                  Expanded(child: TextField(controller: room, decoration: const InputDecoration(labelText: 'Room ID (optional)'))),
-                ]),
-                TextField(controller: category, decoration: const InputDecoration(labelText: 'Category')),
-                const SizedBox(height: 8),
-                ListTile(
-                  title: Text('Start: ${start.toLocal()}'),
-                  trailing: TextButton(
-                    onPressed: () async {
-                      final picked = await _pickDateTime(context, start);
-                      if (picked != null) setState(() => start = picked);
-                    },
-                    child: const Text('Pick'),
+            width: 460,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                      controller: id,
+                      enabled: e == null,
+                      decoration: const InputDecoration(labelText: 'ID')),
+                  TextField(
+                      controller: title,
+                      decoration:
+                          const InputDecoration(labelText: 'Title')),
+                  TextField(
+                      controller: desc,
+                      decoration:
+                          const InputDecoration(labelText: 'Description'),
+                      maxLines: 3),
+                  TextField(
+                      controller: building,
+                      decoration:
+                          const InputDecoration(labelText: 'Building ID')),
+                  Row(children: [
+                    Expanded(
+                        child: TextField(
+                            controller: floor,
+                            decoration: const InputDecoration(
+                                labelText: 'Floor'))),
+                    const SizedBox(width: 8),
+                    Expanded(
+                        child: TextField(
+                            controller: room,
+                            decoration: const InputDecoration(
+                                labelText: 'Room ID (optional)'))),
+                  ]),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: category,
+                    decoration:
+                        const InputDecoration(labelText: 'Category'),
+                    items: eventCategories
+                        .map((c) =>
+                            DropdownMenuItem(value: c, child: Text(c)))
+                        .toList(),
+                    onChanged: (v) =>
+                        setState(() => category = v ?? 'general'),
                   ),
-                ),
-                ListTile(
-                  title: Text('End: ${end.toLocal()}'),
-                  trailing: TextButton(
-                    onPressed: () async {
-                      final picked = await _pickDateTime(context, end);
-                      if (picked != null) setState(() => end = picked);
-                    },
-                    child: const Text('Pick'),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    value: featured,
+                    onChanged: (v) => setState(() => featured = v),
+                    title: const Text('Pin to home'),
+                    subtitle: const Text(
+                        'Featured events appear first in "Happening here"'),
                   ),
-                ),
-              ],
+                  ListTile(
+                    title: Text('Start: ${start.toLocal()}'),
+                    trailing: TextButton(
+                      onPressed: () async {
+                        final picked = await _pickDateTime(context, start);
+                        if (picked != null) setState(() => start = picked);
+                      },
+                      child: const Text('Pick'),
+                    ),
+                  ),
+                  ListTile(
+                    title: Text('End: ${end.toLocal()}'),
+                    trailing: TextButton(
+                      onPressed: () async {
+                        final picked = await _pickDateTime(context, end);
+                        if (picked != null) setState(() => end = picked);
+                      },
+                      child: const Text('Pick'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel')),
             FilledButton(
               onPressed: () async {
                 await ref.read(eventsRepositoryProvider).upsert(CampusEvent(
@@ -142,10 +192,13 @@ class AdminEventsPage extends ConsumerWidget {
                       description: desc.text.trim(),
                       buildingId: building.text.trim(),
                       floor: int.tryParse(floor.text) ?? 1,
-                      roomId: room.text.trim().isEmpty ? null : room.text.trim(),
+                      roomId: room.text.trim().isEmpty
+                          ? null
+                          : room.text.trim(),
                       startTime: start,
                       endTime: end,
-                      category: category.text.trim(),
+                      category: category,
+                      featured: featured,
                     ));
                 if (context.mounted) Navigator.pop(context);
               },
@@ -157,7 +210,8 @@ class AdminEventsPage extends ConsumerWidget {
     );
   }
 
-  Future<DateTime?> _pickDateTime(BuildContext context, DateTime initial) async {
+  Future<DateTime?> _pickDateTime(
+      BuildContext context, DateTime initial) async {
     final date = await showDatePicker(
       context: context,
       initialDate: initial,

@@ -89,6 +89,63 @@ class BuildingsRepository {
     return s.docs.map((d) => RoomDoc.fromMap(d.id, d.data())).toList();
   }
 
+  Stream<RoomDoc?> watchRoom(String buildingId, String roomId) =>
+      _col.doc(buildingId).collection('rooms').doc(roomId).snapshots().map(
+          (s) => s.exists ? RoomDoc.fromMap(s.id, s.data()!) : null);
+
+  /// Add a person to a room and (if their `roomId` is unset) set them home.
+  /// Writes both sides in a single batch.
+  Future<void> addOccupant({
+    required String buildingId,
+    required String roomId,
+    required String personId,
+    required bool setAsPrimary,
+  }) async {
+    final batch = _db.batch();
+    batch.set(
+      _col.doc(buildingId).collection('rooms').doc(roomId),
+      {
+        'occupantIds': FieldValue.arrayUnion([personId]),
+      },
+      SetOptions(merge: true),
+    );
+    if (setAsPrimary) {
+      batch.set(
+        _db.collection('people').doc(personId),
+        {'roomId': roomId, 'buildingId': buildingId},
+        SetOptions(merge: true),
+      );
+    }
+    await batch.commit();
+  }
+
+  /// Remove a person from a room. If the person's primary room equals this
+  /// room, clear it on the person doc.
+  Future<void> removeOccupant({
+    required String buildingId,
+    required String roomId,
+    required String personId,
+  }) async {
+    final batch = _db.batch();
+    batch.set(
+      _col.doc(buildingId).collection('rooms').doc(roomId),
+      {
+        'occupantIds': FieldValue.arrayRemove([personId]),
+      },
+      SetOptions(merge: true),
+    );
+    final personSnap = await _db.collection('people').doc(personId).get();
+    final pRoom = personSnap.data()?['roomId'];
+    if (pRoom == roomId) {
+      batch.set(
+        _db.collection('people').doc(personId),
+        {'roomId': null},
+        SetOptions(merge: true),
+      );
+    }
+    await batch.commit();
+  }
+
   Future<void> upsertRoom(String buildingId, RoomDoc r) => _col
       .doc(buildingId)
       .collection('rooms')

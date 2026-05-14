@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:ts_management/admin/pages/admin_room_detail_page.dart';
 import 'package:ts_management/data/models/room.dart';
 import 'package:ts_management/data/repositories/repositories.dart';
 
@@ -49,7 +50,15 @@ class AdminRoomsPage extends ConsumerWidget {
                               leading: CircleAvatar(child: Text(r.number)),
                               title: Text(r.name),
                               subtitle: Text(
-                                  'Floor ${r.floor} · ${r.type.name} · waypoint=${r.waypointId}'),
+                                  'Floor ${r.floor} · ${r.type.name} · ${r.occupantIds.length} occupants'),
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => AdminRoomDetailPage(
+                                    buildingId: buildingId,
+                                    roomId: r.id,
+                                  ),
+                                ),
+                              ),
                               trailing: Wrap(children: [
                                 IconButton(
                                   icon: const Icon(Icons.edit_outlined),
@@ -77,7 +86,8 @@ class AdminRoomsPage extends ConsumerWidget {
     final number = TextEditingController(text: r?.number ?? '');
     final floor = TextEditingController(text: '${r?.floor ?? 1}');
     final name = TextEditingController(text: r?.name ?? '');
-    final occupant = TextEditingController(text: r?.occupantId ?? '');
+    final occupant =
+        TextEditingController(text: r?.occupantIds.join(', ') ?? '');
     final waypoint = TextEditingController(text: r?.waypointId ?? '');
     var type = r?.type ?? RoomType.office;
     showDialog(
@@ -114,8 +124,8 @@ class AdminRoomsPage extends ConsumerWidget {
                     decoration: const InputDecoration(labelText: 'Waypoint ID')),
                 TextField(
                     controller: occupant,
-                    decoration:
-                        const InputDecoration(labelText: 'Occupant person ID (optional)')),
+                    decoration: const InputDecoration(
+                        labelText: 'Occupant IDs (comma separated, optional)')),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<RoomType>(
                   value: type,
@@ -142,8 +152,13 @@ class AdminRoomsPage extends ConsumerWidget {
                         number: number.text.trim(),
                         floor: int.tryParse(floor.text) ?? 1,
                         name: name.text.trim(),
-                        occupantId:
-                            occupant.text.trim().isEmpty ? null : occupant.text.trim(),
+                        occupantIds: occupant.text.trim().isEmpty
+                            ? const []
+                            : occupant.text
+                                .split(',')
+                                .map((s) => s.trim())
+                                .where((s) => s.isNotEmpty)
+                                .toList(),
                         waypointId: waypoint.text.trim(),
                         type: type,
                       ),

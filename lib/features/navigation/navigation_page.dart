@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:ts_management/core/theme/app_theme.dart';
 import 'package:ts_management/data/models/building.dart';
 import 'package:ts_management/data/models/room.dart';
 import 'package:ts_management/data/models/waypoint.dart';
@@ -28,7 +29,8 @@ class NavigationPage extends ConsumerStatefulWidget {
   ConsumerState<NavigationPage> createState() => _NavigationPageState();
 }
 
-class _NavigationPageState extends ConsumerState<NavigationPage> {
+class _NavigationPageState extends ConsumerState<NavigationPage>
+    with SingleTickerProviderStateMixin {
   ComputedRoute? _route;
   List<FloorDoc> _floors = const [];
   NavigationGraph? _graph;
@@ -36,12 +38,23 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
   int _segmentIndex = 0;
   int _stepIndex = 0;
   bool _arrived = false;
+  bool _stepsExpanded = false;
   String? _error;
+
+  late final AnimationController _pulse =
+      AnimationController(vsync: this, duration: const Duration(seconds: 4))
+        ..repeat();
 
   @override
   void initState() {
     super.initState();
     _loadRoute();
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
   }
 
   Future<void> _loadRoute() async {
@@ -84,54 +97,20 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     );
   }
 
-  void _next() {
+  void _advanceStep() {
     final seg = _segment;
     if (seg == null) return;
     if (_stepIndex < seg.instructions.length - 1) {
       setState(() => _stepIndex++);
       return;
     }
-    // Last step in this segment.
     if (_segmentIndex < _route!.segments.length - 1) {
-      _confirmFloorTransition();
-    } else {
-      setState(() => _arrived = true);
-    }
-  }
-
-  void _previous() {
-    if (_stepIndex > 0) {
-      setState(() => _stepIndex--);
-    } else if (_segmentIndex > 0) {
-      setState(() {
-        _segmentIndex--;
-        _stepIndex = _route!.segments[_segmentIndex].instructions.length - 1;
-      });
-    }
-  }
-
-  Future<void> _confirmFloorTransition() async {
-    final nextFloor = _route!.segments[_segmentIndex + 1].floor;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Are you on Floor $nextFloor?'),
-        content: const Text('Confirm when you reach the next floor.'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Not yet')),
-          FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text("Yes, I'm here")),
-        ],
-      ),
-    );
-    if (ok == true && mounted) {
       setState(() {
         _segmentIndex++;
         _stepIndex = 0;
       });
+    } else {
+      setState(() => _arrived = true);
     }
   }
 
@@ -163,52 +142,41 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
     final floorRooms =
         _rooms.where((r) => r.floor == segment.floor).toList();
 
-    final progress = _arrived
-        ? 1.0
-        : (segments.take(_segmentIndex).fold<int>(
-                    0,
-                    (sum, s) => sum + s.instructions.length) +
-                _stepIndex +
-                1) /
-            segments.fold<int>(0, (sum, s) => sum + s.instructions.length).clamp(1, 1 << 30);
+    final isLastSegment = _segmentIndex == segments.length - 1;
+    final crossFloor = !isLastSegment;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.destinationLabel,
             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(8),
-          child: LinearProgressIndicator(value: progress, minHeight: 4),
-        ),
       ),
       body: Column(
         children: [
-          // Floor header
+          // Floor pill
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: scheme.primaryContainer,
+                    color: AppTheme.primary,
                     borderRadius: BorderRadius.circular(99),
                   ),
                   child: Text('Floor ${segment.floor}',
-                      style: TextStyle(
-                          color: scheme.onPrimaryContainer,
+                      style: const TextStyle(
+                          color: AppTheme.onPrimary,
                           fontWeight: FontWeight.w700)),
                 ),
                 const SizedBox(width: 10),
-                Text(
-                    'Segment ${_segmentIndex + 1} of ${segments.length}',
-                    style: TextStyle(color: scheme.onSurfaceVariant)),
+                Text('Segment ${_segmentIndex + 1} of ${segments.length}',
+                    style: const TextStyle(color: AppTheme.textSecondary)),
               ],
             ),
           ),
-          // Floor map
+          // Floor map with animated dot
           Expanded(
-            flex: 4,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ClipRRect(
@@ -223,18 +191,30 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
                             imageUrl: floorDoc.floorPlanUrl!,
                             fit: BoxFit.cover)
                       else
-                        Container(color: scheme.surfaceContainerHigh),
-                      CustomPaint(
-                        painter: FloorPlanPainter(
-                          routeNodes: segment.nodes,
-                          allNodes: floorNodes,
-                          allEdges: floorEdges,
-                          rooms: floorRooms,
-                          viewWidth: floorDoc.width,
-                          viewHeight: floorDoc.height,
-                          activeIndex: _stepIndex + 1,
-                          routeColor: scheme.primary,
-                          scheme: scheme,
+                        Image.asset(
+                          'assets/floorplans/${segment.floor <= 0 ? "floor_b1" : "floor_${segment.floor}"}.png',
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              Container(color: scheme.surfaceContainerHigh),
+                        ),
+                      AnimatedBuilder(
+                        animation: _pulse,
+                        builder: (_, __) => CustomPaint(
+                          painter: FloorPlanPainter(
+                            routeNodes: segment.nodes,
+                            allNodes: floorNodes,
+                            allEdges: floorEdges,
+                            rooms: floorRooms,
+                            viewWidth: floorDoc.width,
+                            viewHeight: floorDoc.height,
+                            activeIndex: _stepIndex + 1,
+                            routeColor: AppTheme.primary,
+                            scheme: scheme,
+                            pulseT: _pulse.value,
+                            destinationWaypointId: isLastSegment
+                                ? widget.endWaypointId
+                                : null,
+                          ),
                         ),
                       ),
                     ],
@@ -243,83 +223,197 @@ class _NavigationPageState extends ConsumerState<NavigationPage> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          // Current step card
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              child: Container(
-                key: ValueKey('$_segmentIndex-$_stepIndex-$_arrived'),
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: _arrived ? Colors.green : scheme.primary,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                        _arrived
-                            ? Icons.check_circle_rounded
-                            : Icons.directions_walk_rounded,
-                        color: Colors.white,
-                        size: 36),
-                    const SizedBox(height: 8),
-                    Text(
-                      _arrived
-                          ? 'You have arrived!'
-                          : segment.instructions[_stepIndex],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700),
-                    ),
-                  ],
-                ),
-              ),
+          if (crossFloor && _stepIndex == segment.instructions.length - 1)
+            _CrossFloorCard(
+              fromFloor: segment.floor,
+              toFloor: segments[_segmentIndex + 1].floor,
+              onNext: () => setState(() {
+                _segmentIndex++;
+                _stepIndex = 0;
+              }),
             ),
-          ),
-          const SizedBox(height: 12),
-          // Bottom buttons
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-            child: _arrived
-                ? FilledButton.icon(
-                    onPressed: () => context.go('/home'),
-                    icon: const Icon(Icons.home_rounded),
-                    label: const Text('Finish'),
-                  )
-                : Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: (_segmentIndex == 0 && _stepIndex == 0)
-                              ? null
-                              : _previous,
-                          icon: const Icon(Icons.arrow_back_rounded),
-                          label: const Text('Back'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 2,
-                        child: FilledButton.icon(
-                          onPressed: _next,
-                          icon: const Icon(Icons.arrow_forward_rounded),
-                          label: Text(_isLastStep ? 'Finish' : 'Next'),
-                        ),
-                      ),
-                    ],
-                  ),
+          _StepsPanel(
+            current: _arrived
+                ? const BilingualStep('Хүрлээ', 'You have arrived')
+                : (segment.steps.isNotEmpty
+                    ? segment.steps[_stepIndex]
+                    : const BilingualStep('Урагш яв', 'Walk forward')),
+            allSteps:
+                _route!.segments.expand((s) => s.steps).toList(growable: false),
+            expanded: _stepsExpanded,
+            onToggle: () =>
+                setState(() => _stepsExpanded = !_stepsExpanded),
+            onNext: _arrived ? null : _advanceStep,
+            arrived: _arrived,
           ),
         ],
       ),
+      bottomNavigationBar: _arrived
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: FilledButton.icon(
+                  onPressed: () => context.go('/home'),
+                  icon: const Icon(Icons.home_rounded),
+                  label: const Text('Finish'),
+                ),
+              ),
+            )
+          : null,
     );
   }
+}
 
-  bool get _isLastStep =>
-      _segmentIndex == _route!.segments.length - 1 &&
-      _stepIndex == _segment!.instructions.length - 1;
+class _CrossFloorCard extends StatelessWidget {
+  const _CrossFloorCard({
+    required this.fromFloor,
+    required this.toFloor,
+    required this.onNext,
+  });
+  final int fromFloor;
+  final int toFloor;
+  final VoidCallback onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+          border: const Border(
+              left: BorderSide(color: AppTheme.live, width: 3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.stairs_rounded, color: AppTheme.live),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Take stairs → Floor $toFloor',
+                style: const TextStyle(
+                    fontWeight: FontWeight.w700, fontSize: 14),
+              ),
+            ),
+            FilledButton.tonal(
+              onPressed: onNext,
+              child: const Text('Next floor'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StepsPanel extends StatelessWidget {
+  const _StepsPanel({
+    required this.current,
+    required this.allSteps,
+    required this.expanded,
+    required this.onToggle,
+    required this.onNext,
+    required this.arrived,
+  });
+
+  final BilingualStep current;
+  final List<BilingualStep> allSteps;
+  final bool expanded;
+  final VoidCallback onToggle;
+  final VoidCallback? onNext;
+  final bool arrived;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: arrived ? AppTheme.success : AppTheme.primary,
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                    arrived
+                        ? Icons.check_circle_rounded
+                        : Icons.directions_walk_rounded,
+                    color: Colors.white),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(current.mn,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800)),
+                      Text(current.en,
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    expanded ? Icons.expand_more_rounded : Icons.list_rounded,
+                    color: Colors.white,
+                  ),
+                  onPressed: onToggle,
+                ),
+                if (onNext != null)
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppTheme.primary,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
+                    ),
+                    onPressed: onNext,
+                    child: const Text('Next'),
+                  ),
+              ],
+            ),
+            if (expanded) ...[
+              const SizedBox(height: 10),
+              const Divider(color: Colors.white24),
+              ...allSteps.asMap().entries.map((e) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${e.key + 1}.',
+                            style: const TextStyle(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w700)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(e.value.mn,
+                                  style: const TextStyle(color: Colors.white)),
+                              Text(e.value.en,
+                                  style: const TextStyle(
+                                      color: Colors.white70, fontSize: 11)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 }
